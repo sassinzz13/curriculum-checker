@@ -8,6 +8,11 @@
 <header>
 <h1><a href="{% url 'student_data' %}">Student datas</a></h1>
 </header>
+
+<a href="{% url 'student_create' %}">
+    <button type="button">Create Student</button>
+</a>
+
 <div>
 {% block content %}
 {% endblock content %}
