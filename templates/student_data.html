@@ -1,0 +1,12 @@
+<!-- templates/home.html -->
+{% extends "base.html" %}
+{% block content %}
+{% for students in student_query %}
+<div class="post-entry">
+<a href="">Student ID: {{ students.student_id }}</a>
+<p>Student Name:{{ students.student_name }}</a>
+<p>Student Section:{{ students.student_section }}</p>
+<p>Professor:{{ students.professor_name }}</p>
+</div>
+{% endfor %}
+{% endblock content %}
