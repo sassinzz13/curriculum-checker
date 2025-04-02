@@ -44,8 +44,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'students',
     'rest_framework',
+    'accounts.apps.AccountsConfig'
 ]
-
+AUTH_USER_MODEL = "accounts.CustomStudentUser"
+LOGIN_REDIRECT_URL = "student_data" 
+LOGOUT_REDIRECT_URL = "student_data"
+ # new
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
