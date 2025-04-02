@@ -21,7 +21,8 @@ to fetch the endpoints for editing and create and delete:
 #### Create, Put(edit), Delete:  
 ```http://localhost:8000/api/students/```  
 example json:  
-```{
+```
+{
   "student_id": "23-22-210",
   "student_name": "John Ortanez",
   "student_section": "IT-21",
