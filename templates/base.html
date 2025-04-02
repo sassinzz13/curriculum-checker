@@ -9,10 +9,21 @@
 <h1><a href="{% url 'student_data' %}">Student datas</a></h1>
 </header>
 
+{% if user.is_authenticated %}
 <a href="{% url 'student_create' %}">
     <button type="button">Create Student</button>
 </a>
+<form action="{% url 'logout' %}" method="post">
+    {% csrf_token %}
+    <button type="submit">Log Out</button>
+    </form>
 
+
+{%else%}
+<p>login to manipulate</p>
+<a href="{% url 'login' %}">Log In</a>
+<a href="{% url 'signup' %}">Sign Up</a>
+{% endif %}
 <div>
 {% block content %}
 {% endblock content %}

@@ -4,11 +4,14 @@
 {% for students in student_query %}
 <div class="post-entry">
     
+    {% if user.is_authenticated %}
+    <p>Hi MR.{{ user.username }}!</p>
     <a href="">Student ID: {{ students.student_id }}</a>
     <p>Student Name: {{ students.student_name }}</p>
     <p>Student Section: {{ students.student_section }}</p>
     <p>Professor: {{ students.professor_name }}</p>
 
+    
     <form action="{% url 'student_delete' students.pk %}" method="post">
         {% csrf_token %}
         <input type="submit" value="Delete">
@@ -16,6 +19,7 @@
 
 
     <a href="{% url 'student_edit' students.pk %}">Edit {{students.student_name}}</a>
+    {%endif%}
 </div>
 {% endfor %}
 
