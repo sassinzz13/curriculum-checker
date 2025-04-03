@@ -1,0 +1,26 @@
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #000;
+    color: white;
+    padding: 20px;
+    height: 40px;
+    width: 100%;
+}
+
+.navbar-logo {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-logo .logo {
+    height: 20px;
+    margin-right: 10px;
+}
+
+.navbar-logo .school-name {
+    font-size: 16px;
+}
+

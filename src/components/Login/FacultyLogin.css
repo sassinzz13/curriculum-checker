@@ -1,0 +1,253 @@
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: #000000; 
+    color: white;
+    padding: 15px 20px;
+    z-index: 1000;
+}
+
+.faculty-main-container {
+    padding-top:35px;
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    background-color: #011f05;
+}
+
+.left-side {
+    width: 60%; 
+    background: radial-gradient(circle, #42ae50, #024406);
+    padding: 20px;
+    position: relative;
+    height: 93.3vh;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.tear {
+    position: absolute;
+    width: 40%;
+    bottom: -54px;
+    left: -50px;
+}
+
+.light1 {
+    position: absolute;
+    width: 20%;
+    bottom: 140px;
+    left: 100px;
+}
+
+.light2{
+    position: absolute;
+    width: 35%;
+    bottom: -20px;
+    right: 90px;
+}
+
+.wilkam{
+    position: absolute;
+    width: 90%;
+    top: -80px;
+    left: 0px;
+}
+
+.merlogo-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.merlogo-container::before {
+    content: "";
+    position: absolute;
+    width: 90%;
+    height: 90%;
+    background: radial-gradient(circle, rgba(52, 255, 79, 0.6) 40%, transparent 70%);
+    filter: blur(20px);
+    border-radius: 50%;
+    z-index: 0;
+}
+
+.merlogo {
+    position: relative;
+    width: 90%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+    margin: 20px 0;
+    z-index: 1; 
+}
+
+
+.faculty-footer {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 10px;
+}
+
+
+.right-side {
+    width: 38.5%;
+    background: linear-gradient(to top left, #422d04, #d5b215);    display: flex; 
+    justify-content: center;
+    align-items: center; 
+    padding: 20px;
+    flex-direction: column;
+}
+
+.LeftName {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.LeftName h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+}
+
+.LeftName hr {
+    width: 90%;
+    margin: 10px auto;
+    border: 1px solid white;
+}
+
+
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #2d6a4f; 
+    margin: 0;
+}
+
+.login-form-container {
+    background-color: rgb(246, 246, 246); 
+    box-shadow: 10px 10px 15px rgba(0, 0, 0, 0.2); 
+    overflow: hidden;
+    width: 80%;
+    max-width: 300px;
+    margin: 0;
+    padding: 0;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px; 
+    
+}
+
+
+.login-form {
+    width: 100%;
+    margin: 0;
+}
+
+.login-form label {
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: center;
+    color: #2b7a4b;
+    display: block;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5px;
+    width: fit-content;
+}
+
+.login-form img {
+    width: 100%;          
+    height: 100%;
+    object-fit: cover;    
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px; 
+    margin: 0;
+}
+
+.login-form input {
+    width: 90%;
+    padding: 8px;
+    background-color: #2b7a4b;
+    margin-top: 12px;
+    margin-left: 15px;
+    font-size: 1rem;
+    outline: none;
+}
+
+input::placeholder {
+    color: white;          
+    font-weight: bold;       
+    text-align: center;    
+}
+
+input {
+    color: white; 
+    font-weight: bold; 
+    background-color: #2b7a4b; 
+    border-radius: 4px;
+    padding: 8px;
+    width: 100%;
+    outline: none;
+}
+
+
+.login-form input:focus {
+    border-color: #38a169;
+    box-shadow: 0 0 0 2px rgba(56, 161, 105, 0.5);
+}
+
+.login-form button {
+    width: 60%;
+    background-color: #0ddf18;
+    color: white;
+    padding: 12px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: block;
+    margin: 0 auto;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.login-form button:hover {
+    background-color: #08ea04;
+}
+
+.login-form .link {
+    font-size: 0.800rem;
+    text-align: center;
+    margin-top: 8px;
+    margin-bottom: 15px;
+}
+
+.link a {
+    color: #48bb78;
+    text-decoration: none;
+}
+
+.link a:hover {
+    text-decoration: underline;
+}
+
+.link .forgot-password {
+    color: #097f44;
+}
+
+.link .forgot-password:hover {
+    text-decoration: underline;
+}

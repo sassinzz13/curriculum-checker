@@ -1,0 +1,125 @@
+
+.fg-navbar {
+    width: 100%;
+    height: 40px;
+    background-color: #29b31f;
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    box-sizing: border-box; 
+}
+
+.fg-sidebar-icon {
+    font-size: 24px;
+    cursor: pointer;
+    margin-right: 10px; 
+}
+
+.fg-navbar-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0; 
+}
+
+
+.fg-main-content{
+    display: flex;
+    width: 100%;
+    height: 93.3vh;
+    background-color: #22771c;
+}
+
+.fg-left-container{
+    width: 60%; 
+    background: radial-gradient(circle, #42ae50, #011602);
+    padding: 20px;
+    position: relative;
+    height: 88.3vh;
+    margin-top: 15px;
+}
+
+.fg-right-container {
+    width: 38.5%;
+    background: linear-gradient(to top left, #d7d7d7, #dadada);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    position: relative;
+    padding-top: 60px;
+}
+
+.si-container {
+    width: 100%;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    background-color: #174f13;
+    position: absolute;
+    top: 0;
+}
+
+.stuinfo-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    background-color: #fafaf6;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.stuimage {
+    width: 100px; 
+    height: 100px;
+    margin-right: 20px;
+}
+
+.stuimage img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.stuinfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.stuinfo h2 {
+    margin: 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.fg-buttons {
+    display: flex;
+    justify-content: center; 
+    gap: 15px; 
+    align-items: center;
+    margin-top: 20px;
+    width: 100%;
+    padding: 10px 0; 
+    box-sizing: border-box;
+    bottom: 20px;
+}
+
+.fg-buttons button {
+    font-size: 18px; 
+    padding: 12px 24px; 
+    border-radius: 8px; 
+    border: none;
+    cursor: pointer;
+    background-color: #31be22;
+    color: white;
+    transition: background 0.3s;
+}
+
+.fg-buttons button:hover {
+    background-color: #0f6705; 
+}
+

@@ -1,0 +1,37 @@
+.student-table-container {
+    width: 100%;
+    overflow-x: auto;
+    padding: 10px;
+  }
+  
+  .table-title {
+    font-size: 20px;
+    text-align: center;
+    font-weight: bold;
+    color: #000000;
+    background-color: #999999;
+    padding: 10px;
+  }
+  
+  .student-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .student-table th, .student-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+  }
+  
+  .student-table th {
+    background-color: #f4f4f4;
+  }
+  
+  .student-table input {
+    width: 50px;
+    text-align: center;
+  }
+  
+
+  
