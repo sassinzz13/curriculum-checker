@@ -13,7 +13,7 @@ def student_list(request):
 class student_create(CreateView):
     model = Student
     template_name = "student_create.html"
-    fields = ["student_id", "student_name", "student_section", "professor_name"]
+    fields = ["student_id", "student_name", "student_section", "professor_name", "prelims", "midterms", "semifinals", "finals", "gwa"]
     success_url = reverse_lazy("student_data")
 
 class student_delete(DeleteView):

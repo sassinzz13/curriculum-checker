@@ -7,7 +7,7 @@ urlpatterns = [
     path("student_query/<int:pk>/edit/", StudentUpdate.as_view(), name="student_edit" ),
     path("student_query/new/", student_create.as_view(), name="student_create" ),
     path("", student_list, name="student_data"),
-
+    
     # API Endpoints
     path("api/students/", StudentListCreateApi.as_view(), name="student_details_create"),
     path("api/students/<str:student_id>/", StudentRetrieveUpdateDeleteAPI.as_view(), name="student_detail"),
