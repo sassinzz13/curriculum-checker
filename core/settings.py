@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-(gqdq-ckew(&ettclblpb1dk-&t8!=r2=m%n+vs*=ex^9h(qy3
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["192.168.43.130", "127.0.0.1", "172.16.28.70", "0.0.0.0", "curriculum-checker.onrender.com"]
+ALLOWED_HOSTS = ["localhost","192.168.43.130", "127.0.0.1", "172.16.28.70", "0.0.0.0", "curriculum-checker.onrender.com"]
 
 
 # Application definition
@@ -48,20 +48,20 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig'
 ]
 CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://localhost:5175"
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:5173",
+#     "http://localhost:5175",
+#     "http://localhost:8000"
+# ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 CORS_ALLOW_HEADERS = ["*"]
-AUTH_USER_MODEL = "accounts.CustomStudentUser"
+AUTH_USER_MODEL = "accounts.AccountsCustomstudentuser"
 LOGIN_REDIRECT_URL = "student_data" 
 LOGOUT_REDIRECT_URL = "student_data"
  # new
 MIDDLEWARE = [
-        'corsheaders.middleware.CorsMiddleware',
-
+    'corsheaders.middleware.CorsMiddleware',  # Place this first
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -96,13 +96,26 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'ENGINE': 'mssql',
+        'NAME': 'dbmscur',
+        'USER': 'Akecchi',
+        'PASSWORD': 'Aketsiii030720!',
+        'HOST': 'projsadbms.database.windows.net',
+        'PORT': '',
+        'OPTIONS': {
+            'driver': 'ODBC Driver 18 for SQL Server',
+    },
 }
-
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators

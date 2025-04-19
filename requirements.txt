@@ -1,8 +1,11 @@
 asgiref==3.8.1
-Django==5.1.7
+Django==5.0.14
 django-cors-headers==4.7.0
 djangorestframework==3.16.0
 gunicorn==23.0.0
+mssql-django==1.5
 packaging==24.2
+pyodbc==5.2.0
+pytz==2025.2
 sqlparse==0.5.3
 whitenoise==6.9.0

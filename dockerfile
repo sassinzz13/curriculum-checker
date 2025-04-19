@@ -9,7 +9,19 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
 # Set work directory
 WORKDIR /code
 
-# Install dependencies
+# Install dependencies for pyodbc and MS SQL Server ODBC driver
+RUN apt-get update && \
+    apt-get -y install curl gnupg2 unixodbc-dev \
+    && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+    && curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list \
+    && apt-get update && \
+    ACCEPT_EULA=Y apt-get install -y msodbcsql18 \
+    && ACCEPT_EULA=Y apt-get install -y mssql-tools18 \
+    && echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc \
+    && apt-get install -y libgssapi-krb5-2 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy the requirements file and install dependencies
 COPY ./requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt  # Use no-cache-dir to avoid caching unnecessary files
 
@@ -20,6 +32,7 @@ COPY . .
 EXPOSE 8000
 
 # Command to run the application (runs Django's development server)
-#CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-# Command for production
- CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+# Command for production (you can uncomment this if using gunicorn in production)
+# CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000"]

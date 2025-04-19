@@ -1,8 +1,16 @@
+# This is an auto-generated Django model module.
+# You'll have to do the following manually to clean this up:
+#   * Rearrange models' order
+#   * Make sure each model has one field with primary_key=True
+#   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior
+#   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
+# Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
-from django.urls import reverse
 
-class Student(models.Model):
-    student_id = models.CharField(max_length=20, unique=True)  # Ensures unique student ID
+
+class Students(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    student_id = models.CharField(unique=True, max_length=20)
     student_name = models.CharField(max_length=50)
     student_section = models.CharField(max_length=20)
     professor_name = models.CharField(max_length=50)
@@ -12,10 +20,6 @@ class Student(models.Model):
     finals = models.CharField(max_length=10)
     gwa = models.CharField(max_length=10)
 
-    def __str__(self):
-        return f"{self.student_name} ({self.student_section})"
-
-    def get_absolute_url(self):
-        return reverse("student_detail", args=[str(self.student_id)])
-class StudentDetails(models.Model):
-    pass
+    class Meta:
+        # managed = False
+        db_table = 'students_student'
