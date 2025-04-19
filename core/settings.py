@@ -112,7 +112,8 @@ DATABASES = {
         'HOST': 'projsadbms.database.windows.net',
         'PORT': '',
         'OPTIONS': {
-            'driver': 'ODBC Driver 18 for SQL Server',
+            'driver': 'ODBC Driver 17 for SQL Server',
+            'extra_params': 'TrustServerCertificate=yes;Encrypt=yes',
     },
 }
 }
