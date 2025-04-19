@@ -22,12 +22,16 @@ RUN apt-get update && \
         apt-transport-https \
         ca-certificates \
         software-properties-common && \
-    curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/microsoft.gpg && \
-    curl https://packages.microsoft.com/config/debian/11/prod.list -o /etc/apt/sources.list.d/mssql-release.list && \
+    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    echo "deb [arch=amd64] https://packages.microsoft.com/debian/11/prod bullseye main" > /etc/apt/sources.list.d/mssql-release.list && \
     apt-get update && \
-    apt-get install -y msodbcsql17 mssql-tools && \
+    ACCEPT_EULA=Y apt-get install -y msodbcsql17 mssql-tools && \
+    apt-get install -y libssl1.1 || true && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# Diagnostic step (optional, can be removed later)
+RUN odbcinst -q -d && ls /opt/microsoft/msodbcsql17/lib64/
 
 # Copy requirements and install dependencies
 COPY ./requirements.txt .
