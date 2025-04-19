@@ -28,7 +28,7 @@ RUN odbcinst -j && \
 
 # Copy the requirements file and install dependencies
 COPY ./requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt gunicorn==20.1.0
  # Use no-cache-dir to avoid caching unnecessary files
 
 # Copy the rest of the project files into the container
