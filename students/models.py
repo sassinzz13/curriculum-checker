@@ -21,5 +21,5 @@ class Students(models.Model):
     gwa = models.CharField(max_length=10)
 
     class Meta:
-        # managed = False
+        managed = False
         db_table = 'students_student'
