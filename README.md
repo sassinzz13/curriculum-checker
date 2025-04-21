@@ -6,7 +6,7 @@ docker-compose up -d --build
 ```  
 then it will automatically run djangos `python manage.py runserver` through the help of docker  
 
-to fetch the endpoints follow the following:  
+to fetch the endpoints follow the following in the hosted API:  
 #### Login:  
 ```
 https://curriculum-checker.onrender.com/accounts/api/login/
@@ -14,7 +14,13 @@ https://curriculum-checker.onrender.com/accounts/api/login/
 #### Signup:  
 ```
 https://curriculum-checker.onrender.com/accounts/api/signup/
-```  
+```
+
+To fetch the following on local development:
+#### Login:  
+```http://localhost:8000/accounts/api/login/```  
+#### Signup:  
+```http://localhost:8000/accounts/api/signup/```  
 example json format for login and signup:  
 ```json
 {
@@ -24,8 +30,11 @@ example json format for login and signup:
 ```
 
 to fetch the endpoints for editing and create and delete:  
-#### Create, Put(edit), Delete:  
+#### Create, Put(edit), Delete API for hosted API:  
 ```https://curriculum-checker.onrender.com/api/students/```  
+#### Create, Put(edit), Delete API for non-hosted API:  
+```http://localhost:8000/api/students/```  
+
 example json:  
 ```json
     {
