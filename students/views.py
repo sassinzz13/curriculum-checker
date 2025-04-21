@@ -7,8 +7,9 @@ from .serializers import StudentSerializer
 # Create your views here.
 
 def student_list(request):
-    student_query = Students.objects.all()
+    student_query = Students.objects.filter(id=1)
     return render(request, "student_data.html", {'student_query': student_query})
+
 
 class student_create(CreateView):
     model = Students
@@ -25,7 +26,7 @@ class student_delete(DeleteView):
 class StudentUpdate(UpdateView):
     model = Students
     template_name = "student_edit.html"
-    fields = ["student_id", "student_name", "student_section", "professor_name"]
+    fields = ["student_id", "student_name", "student_section", "professor_name", "prelims", "midterms", "semifinals", "finals", "gwa"]
     success_url = reverse_lazy("student_data")
 
 # LIst all students and create a new one
