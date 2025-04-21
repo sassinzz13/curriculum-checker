@@ -2,13 +2,13 @@
 
 To run please run docker first with the following command:  
 ```docker-compose up -d --build```  
-then it will automatically run djangos `python manage.py runserver`  
+then it will automatically run djangos `python manage.py runserver` through the help of docker  
 
 to fetch the endpoints follow the following:  
 #### Login:  
-```http://localhost:8000/accounts/api/login/```
+```[http://localhost:8000](https://curriculum-checker.onrender.com)/accounts/api/login/```
 #### Signup:  
-```http://localhost:8000/accounts/api/signup/```  
+```[http://localhost:8000](https://curriculum-checker.onrender.com)/accounts/api/signup/```  
 example json format for login and signup:  
 ```
 {
@@ -19,7 +19,7 @@ example json format for login and signup:
 
 to fetch the endpoints for editing and create and delete:  
 #### Create, Put(edit), Delete:  
-```http://localhost:8000/api/students/```  
+```[http://localhost:8000](https://curriculum-checker.onrender.com)/api/students/```  
 example json:  
 ```
 {
