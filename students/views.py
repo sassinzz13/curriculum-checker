@@ -7,7 +7,7 @@ from .serializers import StudentSerializer
 # Create your views here.
 
 def student_list(request):
-    student_query = Students.objects.filter(id=1)
+    student_query = Students.objects.all()
     return render(request, "student_data.html", {'student_query': student_query})
 
 
