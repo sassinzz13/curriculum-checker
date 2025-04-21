@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-(gqdq-ckew(&ettclblpb1dk-&t8!=r2=m%n+vs*=ex^9h(qy3
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost","192.168.43.130", "127.0.0.1", "172.16.28.70", "0.0.0.0", "curriculum-checker.onrender.com"]
+ALLOWED_HOSTS = ["localhost","192.168.43.130", "127.0.0.1", "172.16.28.70", "0.0.0.0", "curriculum-checker.onrender.com", "curriculum-checker-1.onrender.com"]
 
 
 # Application definition
