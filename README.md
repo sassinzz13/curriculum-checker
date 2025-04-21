@@ -6,9 +6,9 @@ then it will automatically run djangos `python manage.py runserver` through the 
 
 to fetch the endpoints follow the following:  
 #### Login:  
-```[http://localhost:8000](https://curriculum-checker.onrender.com)/accounts/api/login/```
+```https://curriculum-checker.onrender.com/accounts/api/login/```
 #### Signup:  
-```[http://localhost:8000](https://curriculum-checker.onrender.com)/accounts/api/signup/```  
+```https://curriculum-checker.onrender.com/accounts/api/signup/```  
 example json format for login and signup:  
 ```
 {
@@ -19,7 +19,7 @@ example json format for login and signup:
 
 to fetch the endpoints for editing and create and delete:  
 #### Create, Put(edit), Delete:  
-```[http://localhost:8000](https://curriculum-checker.onrender.com)/api/students/```  
+```https://curriculum-checker.onrender.com/api/students/```  
 example json:  
 ```
 {
