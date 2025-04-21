@@ -105,12 +105,12 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'mssql',
+        'ENGINE': 'sql_server.pyodbc',
         'NAME': 'dbmscur',
         'USER': 'Akecchi',
         'PASSWORD': 'Aketsiii030720!',
         'HOST': 'projsadbms.database.windows.net',
-        'PORT': '',
+        'PORT': '1433',
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
             'extra_params': 'TrustServerCertificate=yes;Encrypt=yes',

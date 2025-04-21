@@ -9,3 +9,5 @@ pyodbc==5.2.0
 pytz==2025.2
 sqlparse==0.5.3
 whitenoise==6.9.0
+django-mssql-backend==2.8.1
+sqlparse==0.5.3
