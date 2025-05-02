@@ -1,5 +1,7 @@
 # Welcome to the Curriculum checker  
 ##### Hello  
 
-```Hello james angeles```
+```python
+print("hello world") 
+```
 
