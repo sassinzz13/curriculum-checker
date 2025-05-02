@@ -5,5 +5,10 @@
 on.render.com
 ```  
 
-this is where you are gonna fetch the **API**
+this is where you are gonna fetch the **API**  
+
+This is how you start the backend  
+```docker
+docker-compose exec web python manage.py runserver
+```
 
