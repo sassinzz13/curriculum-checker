@@ -1,7 +1,7 @@
 # Welcome to the Curriculum checker  
 ##### Hello  
 
-```python
+```bash
 print("hello world") 
 ```
 
