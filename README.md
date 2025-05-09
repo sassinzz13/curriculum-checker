@@ -1,12 +1,19 @@
 ⚠️ **IMPORTANT**: This frontend project relies on a specific data structure from the backend API. To ensure proper communication and avoid CORS issues or data mismatch errors, the backend (e.g., Django) must match the structure and naming conventions of the following frontend constants:
 
 _const [studentInfo, setStudentInfo] = useState(null);_
+
 _const [evaluation, setEvaluation] = useState([]);_
+
 _const [gwa, setGwa] = useState(null);_
+
 _const [enrollSubjects, setEnrollSubjects] = useState([]);_
+
 _const [selectedSubjects, setSelectedSubjects] = useState([]);_
+
 _const [totalUnits, setTotalUnits] = useState(0);_
+
 _const [selected, setSelected] = useState(null);_
+
 _const options = [25, 50, 75, 100];_
 
 These states are directly tied to the expected response format of the backend endpoints. Any mismatch in key names (e.g., studentInfo, gwa, enrollSubjects) or data types (array vs. object) may cause failures in rendering, data binding, or API consumption. Please ensure that:
