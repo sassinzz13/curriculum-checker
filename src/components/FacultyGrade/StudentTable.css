@@ -1,37 +1,92 @@
 .student-table-container {
-    width: 100%;
-    overflow-x: auto;
-    padding: 10px;
-  }
-  
-  .table-title {
-    font-size: 20px;
-    text-align: center;
-    font-weight: bold;
-    color: #000000;
-    background-color: #999999;
-    padding: 10px;
-  }
-  
-  .student-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .student-table th, .student-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
-  }
-  
-  .student-table th {
-    background-color: #f4f4f4;
-  }
-  
-  .student-table input {
-    width: 50px;
-    text-align: center;
-  }
-  
+  width: 100%;
+  padding: 10px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
 
-  
+.table-title {
+  font-size: 18px; 
+  text-align: center;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #666666;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.student-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  font-size: 12px; /* Smaller font size */
+}
+
+.student-table th,
+.student-table td {
+  border: 1px solid #ddd;
+  padding: 5px 6px; /* Further reduced padding */
+  text-align: center;
+  white-space: normal; /* Allow text to wrap inside cells */
+  word-wrap: break-word; /* Break long words into next line */
+}
+
+.student-table th {
+  background-color: #f9f9f9;
+  font-weight: bold;
+}
+
+/* Adjust column widths for readability */
+.student-table td:nth-child(2),
+.student-table th:nth-child(2),
+.student-table td:nth-child(3),
+.student-table th:nth-child(3),
+.student-table td:nth-child(4),
+.student-table th:nth-child(4),
+.student-table td:nth-child(5),
+.student-table th:nth-child(5) {
+  min-width: 120px; 
+}
+
+.student-table td:nth-child(4),
+.student-table th:nth-child(4) {
+  min-width: 60px; 
+}
+
+/* Compact grade input fields */
+.student-table input[type="number"] {
+  width: 50px;
+  text-align: center;
+}
+
+.student-table input[type="text"] {
+  width: 100%;
+  padding: 4px;
+  font-size: 12px; /* Same smaller font size for inputs */
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* This disables the number input arrows completely */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield; /* Firefox */
+  appearance: none; /* Modern browsers */
+}
+
+/* Optionally, you can add styles for the number inputs if needed */
+.grade-input {
+  width: 100%;
+  padding: 8px;
+  text-align: center;
+  font-size: 16px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}

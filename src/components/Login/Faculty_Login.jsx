@@ -1,14 +1,36 @@
 import React, { useState } from "react";
 import "./FacultyLogin.css";
-import Navbar from "../NavBar/NavBar";
+import Navbar from "../Navbar/Navbar";
+import { useNavigate } from "react-router-dom";
 
+const Faculty_Login = () => {
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const navigate = useNavigate();
 
-const FacultyLogin = () => {
-    const [faculty_id, setFacID] = useState("");
-    const [faculty_password, setFacPassword] = useState("");
-
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
+        try {
+            const response = await fetch("https://curriculum-checker.onrender.com/accounts/api/login/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ username, password }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                navigate("/faculty-grades");
+            } else {
+                setError(data?.non_field_errors?.[0] || "Invalid credentials. Please try again.");
+            }
+        } catch (err) {
+            setError("Something went wrong. Please try again later.");
+            console.error("Login error:", err);
+        }
     };
 
     return (
@@ -19,12 +41,12 @@ const FacultyLogin = () => {
                     <img className="merlogo" src="/assets/merlogo.png" alt="Merlogo" />
                 </div>
 
-                    <img src="/assets/wilkam.png" alt="wilkam" className="wilkam" />
-                    <img src="/assets/light1.png" alt="light1" className="light1" />
-                    <img src="/assets/light2.png" alt="light2" className="light2" />
-                    <img src="/assets/tear.png" alt="paper tear" className="tear" />
+                <img src="/assets/wilkam.png" alt="wilkam" className="wilkam" />
+                <img src="/assets/light1.png" alt="light1" className="light1" />
+                <img src="/assets/light2.png" alt="light2" className="light2" />
+                <img src="/assets/tear.png" alt="paper tear" className="tear" />
 
-                <footer class="faculty-footer">
+                <footer className="faculty-footer">
                     <p>© 2025 MgaLigmaProduction. All rights reserved.</p>
                 </footer>
             </div>
@@ -38,26 +60,34 @@ const FacultyLogin = () => {
                 <div className="login-form-container">
                     <div className="login-form">
                         <img src="/assets/facimage.png" alt="Faculty Group" />
-                        
+
                         <form onSubmit={handleLogin}>
                             <label>FACULTY ID</label>
-                            <input 
+                            <input
                                 type="text"
-                                value={faculty_id}
-                                onChange={(e) => setFacID(e.target.value)}
+                                value={username}
+                                onChange={(e) => {
+                                    setUsername(e.target.value);
+                                    setError("");
+                                }}
                                 required
                                 placeholder="Enter your Faculty ID"
                             />
-                            
+
                             <label>PASSWORD</label>
-                            <input 
+                            <input
                                 type="password"
-                                value={faculty_password}
-                                onChange={(e) => setFacPassword(e.target.value)}
+                                value={password}
+                                onChange={(e) => {
+                                    setPassword(e.target.value);
+                                    setError("");
+                                }}
                                 required
                                 placeholder="Enter your Password"
                             />
-                            
+
+                            {error && <p className="error-message">{error}</p>}
+
                             <button type="submit">Sign In</button>
                         </form>
 
@@ -71,4 +101,4 @@ const FacultyLogin = () => {
     );
 };
 
-export default FacultyLogin;
+export default Faculty_Login;

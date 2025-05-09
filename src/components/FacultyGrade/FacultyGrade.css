@@ -6,8 +6,16 @@
     color: white;
     display: flex;
     align-items: center;
+    margin-top: 40px;
     padding: 0 20px;
     box-sizing: border-box; 
+}
+
+.fg-navbar-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-left: 10px; 
+    color: white;
 }
 
 .fg-sidebar-icon {
@@ -48,6 +56,12 @@
     padding: 20px;
     position: relative;
     padding-top: 60px;
+}
+
+.fg-right-container h1 {
+    font-size: 24px;
+    color: #ffffff;
+    margin-bottom: 20px;
 }
 
 .si-container {

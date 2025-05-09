@@ -1,30 +1,43 @@
 import React, { useState } from "react";
 import "./AdminLogin.css";
-import Navbar from "../NavBar/NavBar";
-
+import Navbar from "../Navbar/Navbar";
+import { useNavigate } from "react-router-dom";
 
 const AdminLogin = () => {
-    const [admin_id, setADMID] = useState("");
-    const [admin_password, setADMPassword] = useState("");
+    const [username, setADMUsername] = useState("");
+    const [password, setADMPassword] = useState("");
+    const navigate = useNavigate();
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
+        const response = await fetch("https://curriculum-checker.onrender.com/accounts/api/login/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+        });
+
+        if (response.ok) {
+            navigate("/admin-pef"); 
+        } else {
+            alert("Invalid credentials. Please try again.");
+        }
     };
 
     return (
         <div className="admin-main-container">
             <Navbar />
+
             <div className="left-side">
                 <div className="merlogo-container">
                     <img className="merlogo" src="/assets/merlogo.png" alt="Merlogo" />
                 </div>
 
-                    <img src="/assets/wilkam.png" alt="wilkam" className="wilkam" />
-                    <img src="/assets/light1.png" alt="light1" className="light1" />
-                    <img src="/assets/light2.png" alt="light2" className="light2" />
-                    <img src="/assets/tear.png" alt="paper tear" className="tear" />
+                <img src="/assets/wilkam.png" alt="wilkam" className="wilkam" />
+                <img src="/assets/light1.png" alt="light1" className="light1" />
+                <img src="/assets/light2.png" alt="light2" className="light2" />
+                <img src="/assets/tear.png" alt="paper tear" className="tear" />
 
-                <footer class="admin-footer">
+                <footer className="admin-footer">
                     <p>© 2025 MgaLigmaProduction. All rights reserved.</p>
                 </footer>
             </div>
@@ -38,26 +51,26 @@ const AdminLogin = () => {
                 <div className="login-form-container">
                     <div className="login-form">
                         <img src="/assets/facimage.png" alt="Admin Group" />
-                        
+
                         <form onSubmit={handleLogin}>
                             <label>Admin ID</label>
-                            <input 
+                            <input
                                 type="text"
-                                value={admin_id}
-                                onChange={(e) => setADMID(e.target.value)}
+                                value={username}
+                                onChange={(e) => setADMUsername(e.target.value)}
                                 required
                                 placeholder="Enter your admin ID"
                             />
-                            
-                            <label>PASSWORD</label>
-                            <input 
+
+                            <label>Password</label>
+                            <input
                                 type="password"
-                                value={admin_password}
+                                value={password}
                                 onChange={(e) => setADMPassword(e.target.value)}
                                 required
-                                placeholder="Enter your Password"
+                                placeholder="Enter your password"
                             />
-                            
+
                             <button type="submit">Sign In</button>
                         </form>
 

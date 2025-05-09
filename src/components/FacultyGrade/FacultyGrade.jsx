@@ -1,31 +1,45 @@
 import React, { useState, useEffect } from "react";
 import { FaBars } from "react-icons/fa";
-import Navbar from "../NavBar/NavBar";
+import Navbar from "../Navbar/Navbar";
 import StudentTable from "./StudentTable";
 import Sidebar from "./SideBar";
 import "./FacultyGrade.css";
 
 const FacultyGrade = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [sections, setSections] = useState([]); 
+  const [sections, setSections] = useState([]);
+  const [isEditable, setIsEditable] = useState(false);  // Track edit mode
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  useEffect(() => {
-    const fetchSections = async () => {
-      try {
-        const response = await fetch("http://your-backend-api.com/sections?professorId=123");
-        const data = await response.json();
-        setSections(data); 
-      } catch (error) {
-        console.error("Error fetching sections:", error);
-      }
-    };
+  const fetchSections = async () => {
+    try {
+      const response = await fetch("http://172.16.28.70:8000/api/students/");
+      const data = await response.json();
+      setSections(data);
+    } catch (error) {
+      console.error("Error fetching sections:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchSections();
   }, []);
+
+  const toggleEditMode = () => {
+    setIsEditable(!isEditable); 
+  };
+
+  const saveAllGrades = () => {
+    const studentTableElement = document.getElementById("student-table-component");
+    if (studentTableElement) {
+      studentTableElement.dispatchEvent(new CustomEvent("saveAllGrades"));
+    }
+    setIsEditable(false); // Lock table after saving
+  };
+
 
   return (
     <div className="fg-main-container">
@@ -40,7 +54,7 @@ const FacultyGrade = () => {
       <div className="fg-main-content">
         <div className="fg-left-container">
           <div className="fg-table-container">
-            <StudentTable />
+            <StudentTable isEditable={isEditable} /> {/* Pass the editable state */}
           </div>
         </div>
         <div className="fg-right-container">
@@ -60,8 +74,20 @@ const FacultyGrade = () => {
             </div>
           </div>
           <div className="fg-buttons">
-            <button className="fg-btn">Edit</button>
-            <button className="fg-btn">Save</button>
+              <button
+                className="fg-btn"
+                onClick={() => setIsEditable(true)} // Only enables editing
+                disabled={isEditable} // Disable if already in edit mode
+              >
+                Edit
+              </button>
+              <button
+                className="fg-btn"
+                onClick={saveAllGrades}
+                disabled={!isEditable}
+              >
+                Save
+              </button>
           </div>
         </div>
       </div>

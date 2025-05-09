@@ -1,8 +1,9 @@
 import React from 'react';
 import './LandingPage.css';
 import Navbar from "../NavBar/NavBar";
+import { Link } from 'react-router-dom'; // Import Link for navigation
 
-const LandingPage = ({ onFacultyClick, onAdminClick }) => {
+const LandingPage = () => {
   return (
     <div className="main">
       <Navbar />
@@ -13,16 +14,21 @@ const LandingPage = ({ onFacultyClick, onAdminClick }) => {
         </div>
 
         <div className="main-middle">
-          <div className="fac-container" onClick={onFacultyClick}>
-            <img src="/assets/fac-logo.png" alt="faculty-logo" />
-            <h1>Are you a Faculty?</h1>
-            <p>Faculty grade students based on their subject, evaluating performance and providing feedback.</p>
+          <div className="fac-container">
+            <Link to="/faculty-login"> {/* Link to Faculty Login page */}
+              <img src="/assets/fac-logo.png" alt="faculty-logo" />
+              <h1>Are you a Faculty?</h1>
+              <p>Faculty grade students based on their subject, evaluating performance and providing feedback.</p>
+            </Link>
           </div>
+          
 
-          <div className="adm-container" onClick={onAdminClick}> 
-            <img src="/assets/adm-logo.png" alt="admin-logo" />
-            <h1>Are you an Admin?</h1>
-            <p>Admins verify student information, grades, and credentials, ensuring accurate records.</p>
+          <div className="adm-container">
+            <Link to="/admin-login"> {/* Link to Admin Login page */}
+              <img src="/assets/adm-logo.png" alt="admin-logo" />
+              <h1>Are you an Admin?</h1>
+              <p>Admins verify student information, grades, and credentials, ensuring accurate records.</p>
+            </Link>
           </div>
         </div>
 

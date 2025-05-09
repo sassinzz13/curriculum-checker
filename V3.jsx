@@ -1,10 +1,9 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Faculty_Login from "./components/Login/Faculty_Login";
+import FacultyLogin from "./components/Login/Faculty_Login";
 import FacultyGrade from "./components/FacultyGrade/FacultyGrade";
 import AdminLogin from "./components/Login/AdminLogin";
 import LandingPage from "./components/LandingPage/LandingPage";
-import AdmPef from "./components/AdmPEF/AdmPEF";
 
 const App = () => {
   return (
@@ -13,20 +12,16 @@ const App = () => {
         <div className="main-content">
           <Routes>
             {/* Route for Landing Page */}
-            <Route path="/off-limits" element={<LandingPage />} />
+            <Route path="/" element={<LandingPage />} />
 
             {/* Route for Faculty Login */}
-            <Route path="/off-limits" element={<Faculty_Login />} />
-
-            {/* Route for FacultyGrades  */}
-            <Route path="/off-limits" element={<FacultyGrade />} /> 
+            <Route path="/faculty-login" element={<FacultyLogin />} />
 
             {/* Route for Admin Login */}
-            <Route path="/" element={<AdminLogin />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
 
-            {/* Route for Admin PEF */}
-            <Route path="/admin-pef" element={<AdmPef/>}/>
-
+            {/* Route for Faculty Grade */}
+            <Route path="/faculty-grades" element={<FacultyGrade />} /> 
           </Routes>
         </div>
       </div>
