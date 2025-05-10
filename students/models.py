@@ -19,6 +19,7 @@ class Students(models.Model):
     semifinals = models.CharField(max_length=10)
     finals = models.CharField(max_length=10)
     gwa = models.CharField(max_length=10)
+    
 
     class Meta:
         # managed = False
