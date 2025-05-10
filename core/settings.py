@@ -106,7 +106,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'mssql',
-        'NAME': 'dbmscur',
+        'NAME': 'DBMSCurr1',
         'USER': 'Akecchi',
         'PASSWORD': 'Aketsiii030720!',
         'HOST': 'projsadbms.database.windows.net',
