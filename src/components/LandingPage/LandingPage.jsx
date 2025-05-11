@@ -1,6 +1,6 @@
 import React from 'react';
 import './LandingPage.css';
-import Navbar from "../NavBar/NavBar";
+import Navbar from '../Navbar/Navbar'; // Import Navbar component
 import { Link } from 'react-router-dom'; // Import Link for navigation
 
 const LandingPage = () => {

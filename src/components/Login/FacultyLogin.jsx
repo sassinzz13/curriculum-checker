@@ -3,7 +3,7 @@ import "./FacultyLogin.css";
 import Navbar from "../Navbar/Navbar";
 import { useNavigate } from "react-router-dom";
 
-const Faculty_Login = () => {
+const FacultyLogin = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -101,4 +101,4 @@ const Faculty_Login = () => {
     );
 };
 
-export default Faculty_Login;
+export default FacultyLogin;

@@ -1,16 +1,66 @@
 import React, { useState, useEffect } from 'react';
 import { FaBars, FaSearch, FaPrint } from 'react-icons/fa';
+import { jsPDF } from "jspdf";  // Import jsPDF
 import './AdmPEF.css';
 
 const AdmPEF = () => {
+  // -----------------------------
+  // STATES FOR STUDENT DATA
+  // -----------------------------
+
+  // Holds the fetched student information
   const [studentInfo, setStudentInfo] = useState(null);
-  const [evaluation, setEvaluation] = useState([]);
-  const [gwa, setGwa] = useState(null);
-  const [enrollSubjects, setEnrollSubjects] = useState([]);
+
+  // Holds the evaluation data (past subjects & grades)
+  const [subjectEvaluations, setSubjectEvaluations] = useState([]);
+
+  // -----------------------------
+  // STATES FOR ENROLLMENT PROCESS
+  // -----------------------------
+
+  // List of available subjects for enrollment
+  const [enrollmentOptions, setEnrollmentOptions] = useState([]);
+
+  // Tracks selected subjects to enroll
   const [selectedSubjects, setSelectedSubjects] = useState([]);
-  const [totalUnits, setTotalUnits] = useState(0);
-  const [selected, setSelected] = useState(null);
-  const options = [25, 50, 75, 100];
+
+  // Total units selected by the student
+  const [totalSelectedUnits, setTotalSelectedUnits] = useState(0);
+
+  // -----------------------------
+  // STATE FOR SCHOLARSHIP RECOMMENDATION
+  // -----------------------------
+
+  const [selectedScholarship, setSelectedScholarship] = useState(null);
+
+  // Scholarship options in percentage
+  const scholarshipOptions = [25, 50, 75, 100];
+
+  // -----------------------------
+  // FETCH STUDENT + EVALUATION DATA
+  // -----------------------------
+
+  useEffect(() => {
+    const fetchPEFData = async () => {
+      try {
+        const response = await fetch('http://your-api.com/students/23-22-003/pef');
+        if (!response.ok) throw new Error('Failed to fetch PEF data');
+
+        const data = await response.json();
+        setStudentInfo(data.student); // Student basic info and GWA
+        setSubjectEvaluations(data.evaluation); // Evaluation records
+        setEnrollmentOptions(data.enrollSubjects); // Enrollment subject list
+      } catch (err) {
+        console.error('Error fetching PEF data:', err);
+      }
+    };
+
+    fetchPEFData();
+  }, []);
+
+  // -----------------------------
+  // DETERMINE SCHOLARSHIP QUALIFICATION
+  // -----------------------------
 
   const getScholarshipRemark = (gwaValue) => {
     if (gwaValue >= 1.0 && gwaValue <= 1.25) return { percentage: 100, remark: "Full scholarship (President’s Lister)" };
@@ -20,46 +70,64 @@ const AdmPEF = () => {
     return { percentage: 0, remark: "No scholarship" };
   };
 
-  useEffect(() => {
+  // -----------------------------
+  // HANDLE SUBJECT SELECTION FOR ENROLLMENT
+  // -----------------------------
 
-    const fetchPEFData = async () => {
-      try {
-        const response = await fetch('http://your-api.com/students/23-22-003/pef');
-        if (!response.ok) throw new Error('Failed to fetch PEF data');
-        const data = await response.json();
-        
-        setStudentInfo(data.student);
-        setEvaluation(data.evaluation);
-        setGwa(data.gwa);
-        setEnrollSubjects(data.enrollSubjects);
-      } catch (err) {
-        console.error('Error fetching PEF data:', err);
-      }
-    };
-
-    fetchPEFData();
-  }, []);
-
-  const handleSubjectSelection = (subject) => {
-    const currentTotalUnits = totalUnits + subject.units;
+  const handleSelectSubject = (subject) => {
     const maxUnits = studentInfo.year === 4 ? 30 : 24;
+    const newTotal = totalSelectedUnits + subject.units;
 
-    if (currentTotalUnits <= maxUnits) {
+    // Prevent overloading units
+    if (newTotal <= maxUnits) {
       setSelectedSubjects([...selectedSubjects, subject]);
-      setTotalUnits(currentTotalUnits);
+      setTotalSelectedUnits(newTotal);
     } else {
       alert(`You cannot select more than ${maxUnits} units.`);
     }
   };
 
-  const handleSubjectDeselect = (subject) => {
-    const updatedSelectedSubjects = selectedSubjects.filter(s => s.subjectCode !== subject.subjectCode);
-    setSelectedSubjects(updatedSelectedSubjects);
-    setTotalUnits(updatedSelectedSubjects.reduce((acc, curr) => acc + curr.units, 0));
+  // Remove subject from selection list
+  const handleDeselectSubject = (subject) => {
+    const updatedSubjects = selectedSubjects.filter(s => s.subjectCode !== subject.subjectCode);
+    setSelectedSubjects(updatedSubjects);
+
+    // Recalculate total units
+    const updatedTotal = updatedSubjects.reduce((sum, curr) => sum + curr.units, 0);
+    setTotalSelectedUnits(updatedTotal);
+  };
+
+  // -----------------------------
+  // GENERATE PDF FUNCTION
+  // -----------------------------
+
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    const selectedSubjectsList = selectedSubjects.map(subject => `${subject.subjectName} (${subject.units} units)`).join('\n');
+    
+    doc.setFontSize(12);
+    doc.text('Student Enrollment Summary', 20, 20);
+    
+    doc.text(`Student Name: ${studentInfo?.name}`, 20, 30);
+    doc.text(`Student ID: ${studentInfo?.id}`, 20, 40);
+    doc.text(`General Weighted Average (GWA): ${studentInfo?.gwa?.value.toFixed(2)}`, 20, 50);
+    doc.text(`Academic Standing: ${studentInfo?.gwa?.standing}`, 20, 60);
+    
+    doc.text(`Total Units Selected: ${totalSelectedUnits}`, 20, 70);
+    doc.text('Selected Subjects:', 20, 80);
+    doc.text(selectedSubjectsList, 20, 90);
+    
+    doc.text(`Scholarship Recommendation: ${getScholarshipRemark(studentInfo?.gwa?.value).remark}`, 20, 110);
+    
+    doc.save('enrollment-summary.pdf');
   };
 
   return (
     <div className="adm-pef-main">
+
+      {/* ======================== */}
+      {/* SEARCH BAR + HEADER INFO */}
+      {/* ======================== */}
       <div className="student-search-container">
         <div className="top-bar">
           <button className="print-btn"><FaPrint /></button>
@@ -73,6 +141,10 @@ const AdmPEF = () => {
       </div>
 
       <div className="adm-pef-main-container">
+
+        {/* ======================== */}
+        {/* STUDENT PROFILE CARD     */}
+        {/* ======================== */}
         {studentInfo && (
           <div className="student-card">
             <header className="student-label">Student's Name</header>
@@ -85,6 +157,9 @@ const AdmPEF = () => {
           </div>
         )}
 
+        {/* ======================== */}
+        {/* EVALUATION TABLE         */}
+        {/* ======================== */}
         <div className="evaluation-container">
           <h2 className="evaluation-title">EVALUATION</h2>
           <div className="evaluation-header">
@@ -102,7 +177,7 @@ const AdmPEF = () => {
               </tr>
             </thead>
             <tbody>
-              {evaluation.map((subject, index) => (
+              {subjectEvaluations.map((subject, index) => (
                 <tr key={index}>
                   <td className='sub-code'>{subject.code}</td>
                   <td>{subject.title}</td>
@@ -115,63 +190,76 @@ const AdmPEF = () => {
           </table>
         </div>
 
-        {gwa && (
+        {/* ======================== */}
+        {/* GWA + ACADEMIC STANDING */}
+        {/* ======================== */}
+        {studentInfo?.gwa && (
           <div className="gwa-container">
             <table className="gwa-table">
               <tbody>
                 <tr>
                   <td className="label">GENERAL WEIGHTED AVERAGE (GWA) :</td>
-                  <td className="value highlight">{gwa.value.toFixed(2)}</td>
+                  <td className="value highlight">{studentInfo.gwa.value.toFixed(2)}</td>
                 </tr>
                 <tr>
                   <td className="label">ACADEMIC STANDING (GS OR WS) :</td>
-                  <td className="value">{gwa.standing}</td>
+                  <td className="value">{studentInfo.gwa.standing}</td>
                 </tr>
               </tbody>
             </table>
           </div>
         )}
 
+        {/* ======================== */}
+        {/* APPROVAL STATUS (Read-only) */}
+        {/* ======================== */}
         <div className="approval">
           <label className="radio-option">
-            <input type="radio" name="approval" value="approve" checked={gwa && gwa.value <= 3.0} disabled />
+            <input type="radio" name="approval" value="approve" checked={studentInfo?.gwa && studentInfo.gwa.value <= 3.0} disabled />
             <span className="radio-label">Approve</span>
           </label>
           <label className="radio-option">
-            <input type="radio" name="approval" value="decline" checked={gwa && gwa.value > 3.0} disabled />
+            <input type="radio" name="approval" value="decline" checked={studentInfo?.gwa && studentInfo.gwa.value > 3.0} disabled />
             <span className="radio-label">Decline</span>
           </label>
         </div>
 
+        {/* ======================== */}
+        {/* AWARDS + SCHOLARSHIP */}
+        {/* ======================== */}
         <div className="awards-container">
           <div className="row">
             <span className="cell label">Recommend for Dean's List</span>
             <span className="cell option">YES</span>
-            <span className="cell checkbox"><input type="checkbox" checked={gwa && gwa.value <= 1.5} disabled /></span>
+            <span className="cell checkbox"><input type="checkbox" checked={studentInfo?.gwa && studentInfo.gwa.value <= 1.5} disabled /></span>
             <span className="cell option">NO</span>
-            <span className="cell checkbox"><input type="checkbox" checked={gwa && gwa.value > 1.5} disabled /></span>
+            <span className="cell checkbox"><input type="checkbox" checked={studentInfo?.gwa && studentInfo.gwa.value > 1.5} disabled /></span>
           </div>
 
           <div className="row">
             <span className="cell label">Recommend for Scholarship</span>
-            {options.map((percent) => (
+            {scholarshipOptions.map((percent) => (
               <span key={percent} className="cell">
                 <button
-                  className={`option-button ${selected === percent ? 'selected' : ''}`}
-                  onClick={() => setSelected(percent)} disabled
+                  className={`option-button ${selectedScholarship === percent ? 'selected' : ''}`}
+                  onClick={() => setSelectedScholarship(percent)}
+                  disabled
                 >
                   {percent}%
                 </button>
               </span>
             ))}
-            {gwa && (
+            {studentInfo?.gwa && (
               <span className="cell scholarship-remark">
-                {getScholarshipRemark(gwa.value).remark}
+                {getScholarshipRemark(studentInfo.gwa.value).remark}
               </span>
             )}
           </div>
         </div>
 
+        {/* ======================== */}
+        {/* SUBJECT ENROLLMENT TABLE */}
+        {/* ======================== */}
         <div className="enrollment-table-container">
           <div className="student-course-info">
             <span>Subjects to be Enrolled</span>
@@ -189,39 +277,37 @@ const AdmPEF = () => {
               </tr>
             </thead>
             <tbody>
-              {enrollSubjects.map((subject, index) => (
-                <tr key={index}>
-                  <td>{subject.subjectCode}</td>
-                  <td>{subject.subjectName}</td>
-                  <td>{subject.units}</td>
-                  <td>
-                    <button 
-                      onClick={() => handleSubjectSelection(subject)} 
-                      disabled={selectedSubjects.some(s => s.subjectCode === subject.subjectCode)}>
-                      Select
-                    </button>
-                    <button 
-                      onClick={() => handleSubjectDeselect(subject)} 
-                      disabled={!selectedSubjects.some(s => s.subjectCode === subject.subjectCode)}>
-                      Deselect
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {enrollmentOptions.map((subject, index) => {
+                const isSelected = selectedSubjects.some(s => s.subjectCode === subject.subjectCode);
+                return (
+                  <tr key={index}>
+                    <td>{subject.subjectCode}</td>
+                    <td>{subject.subjectName}</td>
+                    <td>{subject.units}</td>
+                    <td>
+                      <button onClick={() => handleSelectSubject(subject)} disabled={isSelected}>
+                        Select
+                      </button>
+                      <button onClick={() => handleDeselectSubject(subject)} disabled={!isSelected}>
+                        Deselect
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
-            <tfoot>
-              <tr>
-                <td colSpan="2" className="total-label">Total Academic Units:</td>
-                <td className="total-units-highlight">{totalUnits}</td>
-              </tr>
-            </tfoot>
           </table>
         </div>
 
-        <div className="enrollment-btn">
-          <button className="enroll-btn">Enroll</button>
-          <button className="drop-btn">Drop</button>
+        {/* ======================== */}
+        {/* ENROLLMENT ACTION BUTTON */}
+        {/* ======================== */}
+        <div className="action-bar">
+          <button onClick={generatePDF} className="enroll-btn">
+            Enroll & Download PDF
+          </button>
         </div>
+
       </div>
     </div>
   );

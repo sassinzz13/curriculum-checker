@@ -1,10 +1,10 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Faculty_Login from "./components/Login/Faculty_Login";
+import FacultyLogin from "./components/Login/FacultyLogin";
 import FacultyGrade from "./components/FacultyGrade/FacultyGrade";
 import AdminLogin from "./components/Login/AdminLogin";
 import LandingPage from "./components/LandingPage/LandingPage";
-import AdmPef from "./components/AdmPEF/AdmPEF";
+import AdmPEF from "./components/AdminPEF/AdmPEF";
 
 const App = () => {
   return (
@@ -16,7 +16,7 @@ const App = () => {
             <Route path="/off-limits" element={<LandingPage />} />
 
             {/* Route for Faculty Login */}
-            <Route path="/off-limits" element={<Faculty_Login />} />
+            <Route path="/off-limits" element={<FacultyLogin />} />
 
             {/* Route for FacultyGrades  */}
             <Route path="/off-limits" element={<FacultyGrade />} /> 
