@@ -36,6 +36,8 @@ const AdmPEF = () => {
   // Scholarship options in percentage
   const scholarshipOptions = [25, 50, 75, 100];
 
+  const [searchStudentID, setSearchStudentID] = useState('');
+
   // -----------------------------
   // FETCH STUDENT + EVALUATION DATA
   // -----------------------------
