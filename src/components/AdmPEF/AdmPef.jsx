@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaBars, FaSearch, FaPrint } from 'react-icons/fa';
+import {FaSearch} from 'react-icons/fa';
 import { jsPDF } from "jspdf";  // Import jsPDF
 import './AdmPEF.css';
 
@@ -40,23 +40,27 @@ const AdmPEF = () => {
   // FETCH STUDENT + EVALUATION DATA
   // -----------------------------
 
-  useEffect(() => {
-    const fetchPEFData = async () => {
-      try {
-        const response = await fetch('http://your-api.com/students/23-22-003/pef');
-        if (!response.ok) throw new Error('Failed to fetch PEF data');
+  const handleSearch = async () => {
+    if (!searchStudentID) {
+      alert("Please enter a student ID.");
+      return;
+    }
 
-        const data = await response.json();
-        setStudentInfo(data.student); // Student basic info and GWA
-        setSubjectEvaluations(data.evaluation); // Evaluation records
-        setEnrollmentOptions(data.enrollSubjects); // Enrollment subject list
-      } catch (err) {
-        console.error('Error fetching PEF data:', err);
-      }
-    };
+    try {
+      const response = await fetch(`http://your-api.com/students/${searchStudentID}/pef`);
+      if (!response.ok) throw new Error('Failed to fetch PEF data');
 
-    fetchPEFData();
-  }, []);
+      const data = await response.json();
+      setStudentInfo(data.student);
+      setSubjectEvaluations(data.evaluation);
+      setEnrollmentOptions(data.enrollSubjects);
+      setSelectedSubjects([]);
+      setTotalSelectedUnits(0);
+    } catch (err) {
+      console.error('Error fetching student data:', err);
+      alert("Student data could not be retrieved.");
+    }
+  };
 
   // -----------------------------
   // DETERMINE SCHOLARSHIP QUALIFICATION
@@ -130,9 +134,14 @@ const AdmPEF = () => {
       {/* ======================== */}
       <div className="student-search-container">
         <div className="top-bar">
-          <button className="print-btn"><FaPrint /></button>
-          <input type="text" className="student-id-input" placeholder="Student ID..." />
-          <button className="search-btn"><FaSearch /></button>
+          <input
+            type="text"
+            className="student-id-input"
+            placeholder="Student ID..."
+            value={searchStudentID}
+            onChange={(e) => setSearchStudentID(e.target.value)}
+          />
+          <button className="search-btn" onClick={handleSearch}><FaSearch /></button>
         </div>
         <div className="info-bar">
           <span>2nd Year Student Level</span>
