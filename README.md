@@ -4,7 +4,7 @@
 ```
 
 ```bash
-git clone https://github.com/your-username/curriculum-checker.git
+curriculum-checker.git
 cd curriculum-checker
 ```
 
