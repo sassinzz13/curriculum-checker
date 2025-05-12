@@ -4,7 +4,7 @@ import FacultyLogin from "./components/Login/FacultyLogin";
 import FacultyGrade from "./components/FacultyGrade/FacultyGrade";
 import AdminLogin from "./components/Login/AdminLogin";
 import LandingPage from "./components/LandingPage/LandingPage";
-import AdmPEF from "./components/AdminPEF/AdmPEF";
+import AdmPef from "./components/AdmPEF/AdmPEF";
 
 const App = () => {
   return (
