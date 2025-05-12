@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {FaSearch} from 'react-icons/fa';
 import { jsPDF } from "jspdf";  // Import jsPDF
-import './AdmPEF.css';
+import './AdmPef.css';
 
-const AdmPEF = () => {
+const AdmPef = () => {
   // -----------------------------
   // STATES FOR STUDENT DATA
   // -----------------------------
@@ -324,4 +324,4 @@ const AdmPEF = () => {
   );
 };
 
-export default AdmPEF;
+export default AdmPef;
