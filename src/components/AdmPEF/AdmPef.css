@@ -436,7 +436,9 @@
     gap: 2rem;
   }
 
-  .enroll-btn {
+  .enroll-btn {  
+    display: block;
+    margin: 0 auto;
     padding: 10px 20px;
     background-color: #00aa06; 
     color: white; 
@@ -449,19 +451,4 @@
 
   .enroll-btn:hover {
     background-color: #008000; 
-  }
-
-  .drop-btn {
-    padding: 10px 20px;
-    background-color: #ff0000; 
-    color: white; 
-    border: none; 
-    border-radius: 5px; 
-    cursor: pointer; 
-    font-size: 16px; 
-    transition: background-color 0.3s ease;
-  }
-
-  .drop-btn:hover {
-    background-color: #cc0000; 
   }

@@ -125,7 +125,9 @@ const AdmPef = () => {
     
     doc.text(`Scholarship Recommendation: ${getScholarshipRemark(studentInfo?.gwa?.value).remark}`, 20, 110);
     
-    doc.save('enrollment-summary.pdf');
+      // Sanitize name for file name (remove special characters and spaces)
+    const safeName = studentInfo?.name?.replace(/[^a-z0-9]/gi, '_') || 'student';
+    doc.save(`${safeName}_enrollment_summary.pdf`);
   };
 
   return (
