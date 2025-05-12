@@ -47,19 +47,63 @@ const AdmPef = () => {
       alert("Please enter a student ID.");
       return;
     }
-
+  
     try {
-      const response = await fetch(`http://your-api.com/students/search?student_id=${encodeURIComponent(searchStudentID)}`);
-      if (!response.ok) throw new Error('Failed to fetch PEF data');
-
-      const data = await response.json();
-      setStudentInfo(data.student);
-      setSubjectEvaluations(data.evaluation);
-      setEnrollmentOptions(data.enrollSubjects);
+      const studentRes = await fetch(`https://curriculum-checker.onrender.com/api/students/${searchStudentID}`);
+      if (!studentRes.ok) throw new Error('Failed to fetch student data');
+  
+      const student = await studentRes.json();
+      if (!student || !student.studentid) {
+        alert("Student not found.");
+        return;
+      }
+  
+      // Format basic student info
+      const studentInfoFormatted = {
+        id: student.studentid,
+        name: `${student.firstname} ${student.middlename} ${student.lastname}`,
+        college: student.curriculum,
+        course: student.curriculum,
+        year: new Date().getFullYear() - student.enrollmntyear + 1
+      };
+  
+      // Fetch grades
+      const gradesRes = await fetch(`https://curriculum-checker.onrender.com/api/students/${searchStudentID}/grades/`);
+      const gradesData = await gradesRes.json();
+  
+      // Fetch subject titles
+      const subjectsRes = await fetch(`https://curriculum-checker.onrender.com/api/students/${searchStudentID}/subjects/`);
+      const subjectsData = await subjectsRes.json();
+  
+      // Map subject code to title
+      const subjectTitleMap = {};
+      subjectsData.forEach(subj => {
+        subjectTitleMap[subj.subjectcode] = subj.subjecttitle;
+      });
+  
+      // Prepare evaluation data
+      const evaluations = gradesData.map(item => ({
+        code: item.subjectcode,
+        title: subjectTitleMap[item.subjectcode] || "Unknown",
+        credits: item.units,
+        grade: parseFloat(item.grade),
+        remarks: parseFloat(item.grade) <= 3.0 ? "PASSED" : "FAILED"
+      }));
+  
+      // Compute GWA
+      const totalUnits = evaluations.reduce((sum, curr) => sum + curr.credits, 0);
+      const weightedSum = evaluations.reduce((sum, curr) => sum + (curr.grade * curr.credits), 0);
+      const gwaValue = totalUnits > 0 ? weightedSum / totalUnits : null;
+      const gwaStanding = gwaValue ? getScholarshipRemark(gwaValue).remark : "N/A";
+  
+      setStudentInfo({ ...studentInfoFormatted, gwa: { value: gwaValue, standing: gwaStanding } });
+      setSubjectEvaluations(evaluations);
+      setEnrollmentOptions(subjectsData);
       setSelectedSubjects([]);
       setTotalSelectedUnits(0);
+  
     } catch (err) {
-      console.error('Error fetching student data:', err);
+      console.error('Error:', err);
       alert("Student data could not be retrieved.");
     }
   };
@@ -83,22 +127,23 @@ const AdmPef = () => {
   const handleSelectSubject = (subject) => {
     const maxUnits = studentInfo.year === 4 ? 30 : 24;
     const newTotal = totalSelectedUnits + subject.units;
-
-    // Prevent overloading units
+    
+  
     if (newTotal <= maxUnits) {
-      setSelectedSubjects([...selectedSubjects, subject]);
-      setTotalSelectedUnits(newTotal);
+      // Prevent duplicates
+      if (!selectedSubjects.some(s => s.subjectcode === subject.subjectcode)){
+        setSelectedSubjects([...selectedSubjects, subject]);
+        setTotalSelectedUnits(newTotal);
+      }
     } else {
       alert(`You cannot select more than ${maxUnits} units.`);
     }
   };
-
-  // Remove subject from selection list
+  
+  // Deselect a subject
   const handleDeselectSubject = (subject) => {
-    const updatedSubjects = selectedSubjects.filter(s => s.subjectCode !== subject.subjectCode);
+    const updatedSubjects = selectedSubjects.filter(s => s.subjectcode !== subject.subjectcode);
     setSelectedSubjects(updatedSubjects);
-
-    // Recalculate total units
     const updatedTotal = updatedSubjects.reduce((sum, curr) => sum + curr.units, 0);
     setTotalSelectedUnits(updatedTotal);
   };
@@ -109,26 +154,59 @@ const AdmPef = () => {
 
   const generatePDF = () => {
     const doc = new jsPDF();
-    const selectedSubjectsList = selectedSubjects.map(subject => `${subject.subjectName} (${subject.units} units)`).join('\n');
-    
+    let y = 20;
+  
+    doc.setFontSize(14);
+    doc.text('Student Enrollment Summary', 20, y);
+    y += 10;
+  
     doc.setFontSize(12);
-    doc.text('Student Enrollment Summary', 20, 20);
-    
-    doc.text(`Student Name: ${studentInfo?.name}`, 20, 30);
-    doc.text(`Student ID: ${studentInfo?.id}`, 20, 40);
-    doc.text(`General Weighted Average (GWA): ${studentInfo?.gwa?.value.toFixed(2)}`, 20, 50);
-    doc.text(`Academic Standing: ${studentInfo?.gwa?.standing}`, 20, 60);
-    
-    doc.text(`Total Units Selected: ${totalSelectedUnits}`, 20, 70);
-    doc.text('Selected Subjects:', 20, 80);
-    doc.text(selectedSubjectsList, 20, 90);
-    
-    doc.text(`Scholarship Recommendation: ${getScholarshipRemark(studentInfo?.gwa?.value).remark}`, 20, 110);
-    
-      // Sanitize name for file name (remove special characters and spaces)
+    doc.text(`Student Name: ${studentInfo?.name}`, 20, y); y += 10;
+    doc.text(`Student ID: ${studentInfo?.id}`, 20, y); y += 10;
+    doc.text(`General Weighted Average (GWA): ${studentInfo?.gwa?.value?.toFixed(2) || 'N/A'}`, 20, y); y += 10;
+    doc.text(`Academic Standing: ${studentInfo?.gwa?.standing}`, 20, y); y += 10;
+    doc.text(`Scholarship Recommendation: ${getScholarshipRemark(studentInfo?.gwa?.value).remark}`, 20, y); y += 15;
+  
+    doc.setFontSize(13);
+    doc.text(`Selected Subjects (Total Units: ${totalSelectedUnits}):`, 20, y);
+    y += 10;
+  
+    // Table headers
+    doc.setFontSize(12);
+    doc.text('Code', 20, y);
+    doc.text('Title', 50, y);
+    doc.text('Units', 180, y, { align: 'right' });
+    y += 8;
+  
+    // Subject list
+    selectedSubjects.forEach(subject => {
+      if (y > 270) { // new page if needed
+        doc.addPage();
+        y = 20;
+      }
+      doc.text(subject.subjectcode, 20, y);
+      doc.text(subject.subjecttitle, 50, y);
+      doc.text(subject.units.toString(), 180, y, { align: 'right' });
+      y += 8;
+    });
+  
+    // Save the file
     const safeName = studentInfo?.name?.replace(/[^a-z0-9]/gi, '_') || 'student';
     doc.save(`${safeName}_enrollment_summary.pdf`);
   };
+
+  // -----------------------------
+  // Enrollment Options
+  const uniqueSubjects = [];
+    const seenTitles = new Set();
+
+    for (const subject of enrollmentOptions) {
+      if (!seenTitles.has(subject.subjecttitle)) {
+        uniqueSubjects.push(subject);
+        seenTitles.add(subject.subjecttitle);
+      }
+    }
+  
 
   return (
     <div className="adm-pef-main">
@@ -290,26 +368,37 @@ const AdmPef = () => {
               </tr>
             </thead>
             <tbody>
-              {enrollmentOptions.map((subject, index) => {
-                const isSelected = selectedSubjects.some(s => s.subjectCode === subject.subjectCode);
+              {uniqueSubjects.map((subject, index) => {
+                const isSelected = selectedSubjects.some(s => s.subjectcode === subject.subjectcode);
+
+                const handleCheckboxChange = (e) => {
+                  if (e.target.checked) {
+                    handleSelectSubject(subject);
+                  } else {
+                    handleDeselectSubject(subject);
+                  }
+                };
+
                 return (
                   <tr key={index}>
-                    <td>{subject.subjectCode}</td>
-                    <td>{subject.subjectName}</td>
+                    <td>{subject.subjectcode}</td>
+                    <td>{subject.subjecttitle}</td>
                     <td>{subject.units}</td>
                     <td>
-                      <button onClick={() => handleSelectSubject(subject)} disabled={isSelected}>
-                        Select
-                      </button>
-                      <button onClick={() => handleDeselectSubject(subject)} disabled={!isSelected}>
-                        Deselect
-                      </button>
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={handleCheckboxChange}
+                      />
                     </td>
                   </tr>
                 );
               })}
-            </tbody>
+          </tbody>
           </table>
+          <div className="total-units-bar">
+            <strong>Total Units Selected:</strong> {totalSelectedUnits}
+          </div>
         </div>
 
         {/* ======================== */}

@@ -75,8 +75,8 @@ const AdminLogin = () => {
                             <input
                                 id="admin-id"
                                 type="text"
-                                value={username}
-                                onChange={(e) => setADMUsername(e.target.value)}
+                                value={username} 
+                                onChange={(e) => setADMUsername(e.target.value)} 
                                 required
                                 placeholder="Enter your admin ID"
                             />
