@@ -49,7 +49,7 @@ const AdmPef = () => {
     }
 
     try {
-      const response = await fetch(`http://your-api.com/students/${searchStudentID}/pef`);
+      const response = await fetch(`http://your-api.com/students/search?student_id=${encodeURIComponent(searchStudentID)}`);
       if (!response.ok) throw new Error('Failed to fetch PEF data');
 
       const data = await response.json();
