@@ -2,7 +2,9 @@
 --------  
 #### How to install  
 ```
-npm install boboka
-```
 
+```bash
+git clone https://github.com/your-username/curriculum-checker.git
+cd curriculum-checker
+```
 
