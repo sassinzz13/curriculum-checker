@@ -137,7 +137,7 @@ cd curriculum-checker
 ```
 This is the table of student
 ```bash
-const student = {
+student = {
   name: "Juan Dela Cruz",
   id: "2025-0001",
   gwa: 1.75,
