@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Create a New Subject</h2>
+  <form method="POST">
+    {% csrf_token %}
+    
+    <div>
+      <label for="subjectcode">Subject Code:</label>
+      <input type="text" id="subjectcode" name="subjectcode" required>
+    </div>
+    
+    <div>
+      <label for="subjecttitle">Subject Title:</label>
+      <input type="text" id="subjecttitle" name="subjecttitle" required>
+    </div>
+    
+    <div>
+      <label for="units">Units:</label>
+      <input type="number" id="units" name="units" min="1" max="10" required>
+    </div>
+
+    <div>
+      <label for="prerequisite">Prerequisite:</label>
+      <input type="text" id="prerequisite" name="prerequisite">
+    </div>
+
+    <div>
+      <label for="semester">Semester:</label>
+      <select id="semester" name="semester" required>
+        <option value="1st">1st Semester</option>
+        <option value="2nd">2nd Semester</option>
+        <option value="summer">Summer</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="yearlevel">Year Level:</label>
+      <input type="number" id="yearlevel" name="yearlevel" min="1" max="4" required>
+    </div>
+
+    <div>
+      <input type="submit" value="Create Subject">
+    </div>
+  </form>
+{% endblock %}

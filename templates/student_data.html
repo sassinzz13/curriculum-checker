@@ -1,26 +1,77 @@
-
 {% extends "base.html" %}
+
 {% block content %}
-{% for students in student_query %}
-<div class="post-entry">
-    
-    {% if user.is_authenticated %}
-    <p>Hi MR.{{ user.username }}!</p>
-    <a href="">Student ID: {{ students.student_id }}</a>
-    <p>Student Name: {{ students.student_name }}</p>
-    <p>Student Section: {{ students.student_section }}</p>
-    <p>Professor: {{ students.professor_name }}</p>
 
-    
-    <form action="{% url 'student_delete' students.pk %}" method="post">
+  <!-- Create Buttons -->
+  <a href="{% url 'student_create' %}" class="btn btn-success mb-2">Create New Student</a>
+  <a href="{% url 'subject_create' %}" class="btn btn-success mb-2">Create New Subject</a>
+  <a href="{% url 'grade_create' %}" class="btn btn-success mb-4">Add New Grade</a>
+
+  <!-- Student Records -->
+  <h2>Student Records</h2>
+  {% for student in student_query %}
+    <div class="post-entry mb-4 p-3 border border-secondary rounded">
+      {% if user.is_authenticated %}
+        <p><strong>Hi, Mr. {{ user.username }}!</strong></p>
+        <p><strong>Student ID:</strong> {{ student.studentid }}</p>
+        <p><strong>Student Name:</strong> {{ student.firstname }} {{ student.middlename }} {{ student.lastname }}</p>
+        <p><strong>Enrollment Year:</strong> {{ student.enrollmentyear }}</p>
+        <p><strong>Curriculum:</strong> {{ student.curriculum }}</p>
+        <p><strong>Curriculum ID:</strong> {{ student.curriculumid }}</p>
+        <p><strong>Student Number:</strong> {{ student.studentnumber }}</p>
+
+        <form action="{% url 'student_delete' student.pk %}" method="post" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+
+        <a href="{% url 'student_edit' student.pk %}" class="btn btn-primary">Edit</a>
+      {% endif %}
+    </div>
+  {% empty %}
+    <p>No student records found.</p>
+  {% endfor %}
+
+  <hr>
+
+  <!-- Subjects List -->
+  <h2>Subjects List</h2>
+  {% for subject in subject_query %}
+    <div class="post-entry mb-4 p-3 border border-info rounded">
+      <p><strong>Subject Code:</strong> {{ subject.subjectcode }}</p>
+      <p><strong>Subject Title:</strong> {{ subject.subjecttitle }}</p>
+      <p><strong>Units:</strong> {{ subject.units }}</p>
+      <p><strong>Prerequisite:</strong> {{ subject.prerequisite }}</p>
+      <p><strong>Semester:</strong> {{ subject.semester }}</p>
+      <p><strong>Year Level:</strong> {{ subject.yearlevel }}</p>
+
+      <a href="{% url 'subject_edit' subject.pk %}" class="btn btn-warning">Edit Subject</a>
+    </div>
+  {% empty %}
+    <p>No subject records found.</p>
+  {% endfor %}
+
+  <hr>
+
+  <!-- Grades List -->
+  <h2>Grades List</h2>
+  {% for grade in grades_query %}
+    <div class="post-entry mb-4 p-3 border border-success rounded">
+      <p><strong>Student:</strong> {{ grade.studentid.firstname }} {{ grade.studentid.lastname }}</p>
+      <p><strong>Subject:</strong> {{ grade.subjectcode.subjecttitle }}</p>
+      <p><strong>Grade:</strong> {{ grade.grade }}</p>
+      <p><strong>Units:</strong> {{ grade.units }}</p>
+      <p><strong>Semester:</strong> {{ grade.semester }}</p>
+
+      <a href="{% url 'grade_edit' grade.pk %}" class="btn btn-sm btn-warning">Edit Grade</a>
+
+      <form action="{% url 'grade_delete' grade.pk %}" method="post" class="d-inline">
         {% csrf_token %}
-        <input type="submit" value="Delete">
-    </form>
+        <button type="submit" class="btn btn-sm btn-danger">Delete Grade</button>
+      </form>
+    </div>
+  {% empty %}
+    <p>No grade records found.</p>
+  {% endfor %}
 
-
-    <a href="{% url 'student_edit' students.pk %}">Edit {{students.student_name}}</a>
-    {%endif%}
-</div>
-{% endfor %}
-
-{% endblock content %}
+{% endblock %}

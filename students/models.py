@@ -9,18 +9,43 @@ from django.db import models
 
 
 class Students(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    student_id = models.CharField(unique=True, max_length=20)
-    student_name = models.CharField(max_length=50)
-    student_section = models.CharField(max_length=20)
-    professor_name = models.CharField(max_length=50)
-    prelims = models.CharField(max_length=10)
-    midterms = models.CharField(max_length=10)
-    semifinals = models.CharField(max_length=10)
-    finals = models.CharField(max_length=10)
-    gwa = models.CharField(max_length=10)
+    studentid = models.CharField(db_column='StudentID', primary_key=True, max_length=9)  # Field name made lowercase.
+    firstname = models.CharField(db_column='FirstName', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    lastname = models.CharField(db_column='LastName', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    middlename = models.CharField(db_column='MiddleName', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    enrollmentyear = models.IntegerField(db_column='EnrollmentYear', blank=True, null=True)  # Field name made lowercase.
+    curriculumid = models.IntegerField(db_column='CurriculumID', blank=True, null=True)  # Field name made lowercase.
+    curriculum = models.CharField(db_column='Curriculum', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    studentnumber = models.BigIntegerField(db_column='StudentNumber')  # Field name made lowercase.
+
     
 
     class Meta:
-        # managed = False
-        db_table = 'students_student'
+        managed = False
+        db_table = 'Students'
+
+
+
+class Subject(models.Model):
+    subjectcode = models.CharField(db_column='SubjectCode', primary_key=True, max_length=10)  # Field name made lowercase.
+    subjecttitle = models.CharField(db_column='SubjectTitle', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    units = models.IntegerField(db_column='Units', blank=True, null=True)  # Field name made lowercase.
+    prerequisite = models.CharField(db_column='Prerequisite', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    semester = models.CharField(db_column='Semester', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    yearlevel = models.IntegerField(db_column='YearLevel', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'Subject'
+
+class Grade(models.Model):
+    gradeid = models.IntegerField(db_column='GradeID', primary_key=True)  # Field name made lowercase.
+    studentid = models.ForeignKey('Students', models.DO_NOTHING, db_column='StudentID', blank=True, null=True)  # Field name made lowercase.
+    subjectcode = models.ForeignKey('Subject', models.DO_NOTHING, db_column='SubjectCode', blank=True, null=True)  # Field name made lowercase.
+    semester = models.CharField(db_column='Semester', max_length=30, blank=True, null=True)  # Field name made lowercase.
+    grade = models.DecimalField(db_column='Grade', max_digits=3, decimal_places=2, blank=True, null=True)  # Field name made lowercase.
+    units = models.IntegerField(db_column='Units', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'Grade'

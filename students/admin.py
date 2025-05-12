@@ -4,10 +4,14 @@ from .models import Students
 # Register your models here.
 class StudentsAdmin(admin.ModelAdmin):
     list_display = (
-        "student_id",
-        "student_name",
-        "student_section",
-        "professor_name", 
+        "studentid",
+        "firstname",
+        "lastname",
+        "middlename", 
+        "enrollmentyear",
+        "curriculumid",
+        "curriculum",
+        "studentnumber"
     )
 
 admin.site.register(Students, StudentsAdmin)
