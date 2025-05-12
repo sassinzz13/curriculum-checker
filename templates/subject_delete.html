@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Delete Subject</h2>
+  
+  <p>Are you sure you want to delete the subject <strong>{{ subject.subjecttitle }}</strong>?</p>
+
+  <form action="{% url 'subject_delete' subject.pk %}" method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Yes, Delete</button>
+    <a href="{% url 'subject_data' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+{% endblock %}

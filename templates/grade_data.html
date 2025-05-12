@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  <!-- Create Button for Grade -->
+  <a href="{% url 'grade_create' %}" class="btn btn-success mb-4">Add New Grade</a>
+
+  <!-- Grade Records -->
+  <h2>Grade Records</h2>
+  {% for grade in grades_query %}
+    <div class="post-entry mb-4 p-3 border border-secondary rounded">
+      {% if user.is_authenticated %}
+        <p><strong>Hi, Mr. {{ user.username }}!</strong></p>
+        <p><strong>Grade ID:</strong> {{ grade.gradeid }}</p>
+        <p><strong>Student ID:</strong> {{ grade.studentid }}</p>
+        <p><strong>Subject Code:</strong> {{ grade.subjectcode }}</p>
+        <p><strong>Semester:</strong> {{ grade.semester }}</p>
+        <p><strong>Grade:</strong> {{ grade.grade }}</p>
+        <p><strong>Units:</strong> {{ grade.units }}</p>
+
+        <form action="{% url 'grade_delete' grade.pk %}" method="post" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+
+        <a href="{% url 'grade_edit' grade.pk %}" class="btn btn-primary">Edit</a>
+      {% endif %}
+    </div>
+  {% empty %}
+    <p>No grade records found.</p>
+  {% endfor %}
+
+  <hr>
+
+{% endblock %}

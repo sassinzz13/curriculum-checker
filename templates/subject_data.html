@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  <!-- Create Button for Subject -->
+  <a href="{% url 'subject_create' %}" class="btn btn-success mb-4">Add New Subject</a>
+
+  <!-- Subject Records -->
+  <h2>Subject Records</h2>
+  {% for subject in subject_query %}
+    <div class="post-entry mb-4 p-3 border border-secondary rounded">
+      {% if user.is_authenticated %}
+        <p><strong>Hi, Mr. {{ user.username }}!</strong></p>
+        <p><strong>Subject Code:</strong> {{ subject.subjectcode }}</p>
+        <p><strong>Subject Title:</strong> {{ subject.subjecttitle }}</p>
+        <p><strong>Units:</strong> {{ subject.units }}</p>
+        <p><strong>Prerequisite:</strong> {{ subject.prerequisite }}</p>
+        <p><strong>Semester:</strong> {{ subject.semester }}</p>
+        <p><strong>Year Level:</strong> {{ subject.yearlevel }}</p>
+
+        <form action="{% url 'subject_delete' subject.pk %}" method="post" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+
+        <a href="{% url 'subject_edit' subject.pk %}" class="btn btn-primary">Edit</a>
+      {% endif %}
+    </div>
+  {% empty %}
+    <p>No subject records found.</p>
+  {% endfor %}
+
+  <hr>
+
+{% endblock %}

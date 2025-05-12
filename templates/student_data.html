@@ -34,18 +34,25 @@
 
   <hr>
 
-  <!-- Subjects List -->
-  <h2>Subjects List</h2>
+  <!-- Subject Records -->
+  <h2>Subject Records</h2>
   {% for subject in subject_query %}
-    <div class="post-entry mb-4 p-3 border border-info rounded">
-      <p><strong>Subject Code:</strong> {{ subject.subjectcode }}</p>
-      <p><strong>Subject Title:</strong> {{ subject.subjecttitle }}</p>
-      <p><strong>Units:</strong> {{ subject.units }}</p>
-      <p><strong>Prerequisite:</strong> {{ subject.prerequisite }}</p>
-      <p><strong>Semester:</strong> {{ subject.semester }}</p>
-      <p><strong>Year Level:</strong> {{ subject.yearlevel }}</p>
+    <div class="post-entry mb-4 p-3 border border-secondary rounded">
+      {% if user.is_authenticated %}
+        <p><strong>Subject Code:</strong> {{ subject.subjectcode }}</p>
+        <p><strong>Subject Title:</strong> {{ subject.subjecttitle }}</p>
+        <p><strong>Units:</strong> {{ subject.units }}</p>
+        <p><strong>Prerequisite:</strong> {{ subject.prerequisite }}</p>
+        <p><strong>Semester:</strong> {{ subject.semester }}</p>
+        <p><strong>Year Level:</strong> {{ subject.yearlevel }}</p>
 
-      <a href="{% url 'subject_edit' subject.pk %}" class="btn btn-warning">Edit Subject</a>
+        <form action="{% url 'subject_delete' subject.pk %}" method="post" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+
+        <a href="{% url 'subject_edit' subject.pk %}" class="btn btn-primary">Edit</a>
+      {% endif %}
     </div>
   {% empty %}
     <p>No subject records found.</p>
@@ -53,25 +60,30 @@
 
   <hr>
 
-  <!-- Grades List -->
-  <h2>Grades List</h2>
+  <!-- Grade Records -->
+  <h2>Grade Records</h2>
   {% for grade in grades_query %}
-    <div class="post-entry mb-4 p-3 border border-success rounded">
-      <p><strong>Student:</strong> {{ grade.studentid.firstname }} {{ grade.studentid.lastname }}</p>
-      <p><strong>Subject:</strong> {{ grade.subjectcode.subjecttitle }}</p>
-      <p><strong>Grade:</strong> {{ grade.grade }}</p>
-      <p><strong>Units:</strong> {{ grade.units }}</p>
-      <p><strong>Semester:</strong> {{ grade.semester }}</p>
+    <div class="post-entry mb-4 p-3 border border-secondary rounded">
+      {% if user.is_authenticated %}
+        <p><strong>Grade ID:</strong> {{ grade.gradeid }}</p>
+        <p><strong>Student ID:</strong> {{ grade.studentid }}</p>
+        <p><strong>Subject Code:</strong> {{ grade.subjectcode }}</p>
+        <p><strong>Semester:</strong> {{ grade.semester }}</p>
+        <p><strong>Grade:</strong> {{ grade.grade }}</p>
+        <p><strong>Units:</strong> {{ grade.units }}</p>
 
-      <a href="{% url 'grade_edit' grade.pk %}" class="btn btn-sm btn-warning">Edit Grade</a>
+        <form action="{% url 'grade_delete' grade.pk %}" method="post" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
 
-      <form action="{% url 'grade_delete' grade.pk %}" method="post" class="d-inline">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-sm btn-danger">Delete Grade</button>
-      </form>
+        <a href="{% url 'grade_edit' grade.pk %}" class="btn btn-primary">Edit</a>
+      {% endif %}
     </div>
   {% empty %}
     <p>No grade records found.</p>
   {% endfor %}
+
+  <hr>
 
 {% endblock %}

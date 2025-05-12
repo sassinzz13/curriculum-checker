@@ -69,19 +69,20 @@ class StudentRetrieveUpdateDeleteAPI(generics.RetrieveUpdateDestroyAPIView):
 # Subject list queryable
 def subject_list(request):
     subject_query = Subject.objects.all()
-    return render(request, "student_data.html", {'subject_query': subject_query})
+    return render(request, "subject_data.html", {'subject_query': subject_query})
+
 
 # List all subjects
 class subject_create(CreateView):
     model = Subject
     template_name = "subject_create.html"
     fields = [
-    "gradeid", 
-    "studentid", 
     "subjectcode", 
+    "subjecttitle", 
+    "units", 
+    "prerequisite", 
     "semester", 
-    "grade", 
-    "units"
+    "yearlevel"
 ]
     
     success_url = reverse_lazy("student_data")
@@ -90,17 +91,18 @@ class subject_delete(DeleteView):
     model = Subject
     template_name = "subject_delete.html"
     success_url = reverse_lazy("student_data")
+    
 
 class subject_edit(CreateView):
     model = Subject
     template_name = "subject_edit.html"
     fields = [
-    "gradeid", 
-    "studentid", 
     "subjectcode", 
+    "subjecttitle", 
+    "units", 
+    "prerequisite", 
     "semester", 
-    "grade", 
-    "units"
+    "yearlevel"
 ]
     
     success_url = reverse_lazy("student_data")
@@ -108,7 +110,7 @@ class subject_edit(CreateView):
 # APis for subjects
 
 class StudentSubjectCreateApi(generics.ListCreateAPIView):
-    # queryset = Subject.objects.all() unecessary?
+    queryset = Subject.objects.all() 
     serializer_class = StudentSubjectSerializer
 
 #Retrieve, update, delete student
@@ -117,8 +119,8 @@ class StudentSubjectRetrieveUpdateDeleteAPI(generics.RetrieveUpdateDestroyAPIVie
     serializer_class = StudentSubjectSerializer
     def get_queryset(self):
         studentid = self.kwargs["studentid"]
-        subject_code = self.kwargs["subject_code"]
-        return Subject.objects.filter(studentid=studentid,subjectcode=subject_code)
+        subjectcode = self.kwargs["subjectcode"]
+        return Subject.objects.filter(studentid=studentid,subjectcode=subjectcode)
 
 # end of subjects
 
@@ -127,7 +129,7 @@ class StudentSubjectRetrieveUpdateDeleteAPI(generics.RetrieveUpdateDestroyAPIVie
 # Subject list queryable
 def grades_list(request):
     grades_query = Subject.objects.all()
-    return render(request, "student_data.html", {'grades_query': grades_query})
+    return render(request, "grade_data.html", {'grades_query': grades_query})
 
 # List all subjects
 class grades_create(CreateView):
