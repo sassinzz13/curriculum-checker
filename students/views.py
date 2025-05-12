@@ -166,8 +166,11 @@ class grade_edit(CreateView):
     success_url = reverse_lazy("student_data")
 
 class StudentGradesListAPI(generics.ListAPIView):
+    queryset = Grade.objects.all()
     serializer_class = StudentGradeSerializer
 
     def get_queryset(self):
-        studentid = self.kwargs["studentid"]
-        return Grade.objects.filter(studentid=studentid)
+        studentid = self.request.query_params.get("studentid")
+        if studentid:
+            return Grade.objects.filter(studentid=studentid)
+        return Grade.objects.all()
