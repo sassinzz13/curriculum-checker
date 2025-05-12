@@ -14,7 +14,7 @@ const student = {
   
   units: 21,
   
-  subjects: [
+  subjects: 5, [
   
     "COMP101 – Introduction to Programming",
     "MATH101 – College Algebra",
