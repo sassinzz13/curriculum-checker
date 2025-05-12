@@ -46,9 +46,14 @@ const AdminLogin = () => {
                 <img src="/assets/light1.png" alt="Light effect 1" className="light1" />
                 <img src="/assets/light2.png" alt="Light effect 2" className="light2" />
                 <img src="/assets/tear.png" alt="Paper tear" className="tear" />
+                <img src="/assets/nakawulet.jpg" alt="heh" className="longet" />
+
 
                 {/* Footer */}
                 <footer className="admin-footer">
+                    <div className="footer-container">
+                        <img src="/assets/logo-namin.png" alt="logonamin" className="logonamin" />
+                    </div>
                     <p>© 2025 MgaLigmaProduction. All rights reserved.</p>
                 </footer>
             </div>

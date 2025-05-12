@@ -20,7 +20,12 @@
     margin-right: 10px;
 }
 
-.navbar-logo .school-name {
+.navbar-logo{
     font-size: 16px;
 }
 
+
+.school-name {
+    font-size: 12px;
+    font-weight: bold;
+}

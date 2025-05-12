@@ -5,8 +5,8 @@ const Navbar = () => {
     return (
         <nav className="navbar">
             <div className="navbar-logo">
-                <img src="/assets/udm-logo.png" alt="School Logo" className="logo" />
-                <span className="school-name">Universidad de Manila</span>
+                <img src="/assets/nakaw.png" alt="School Logo" className="logo" />
+                <span className="school-name">ComSci Attitude Curriculum-Checker</span>
             </div>
         </nav>
     );
