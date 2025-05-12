@@ -15,9 +15,9 @@ urlpatterns = [
     
     # API Endpoints
     path("api/students/", StudentListCreateApi.as_view(), name="student_details_create"),
-    path("api/students/<str:student_id>/", StudentRetrieveUpdateDeleteAPI.as_view(), name="student_detail"),
-    path('api/students/<str:student_id>/subjects/', StudentSubjectCreateApi.as_view(), name="api_student_subject_create_list"),
-    path('api/students/<str:student_id>/subjects/<str:subject_code>/', StudentSubjectRetrieveUpdateDeleteAPI.as_view(), name="api_student_subject_detail"),
+    path("api/students/<str:studentid>/", StudentRetrieveUpdateDeleteAPI.as_view(), name="student_detail"),
+    path('api/students/<str:studentid>/subjects/', StudentSubjectCreateApi.as_view(), name="api_student_subject_create_list"),
+    path('api/students/<str:studentid>/subjects/<str:subject_code>/', StudentSubjectRetrieveUpdateDeleteAPI.as_view(), name="api_student_subject_detail"),
 
-    path('api/students/<str:student_id>/grades/', StudentGradesListAPI.as_view(), name="api_student_grades_list"),
+    path('api/students/<str:studentid>/grades/', StudentGradesListAPI.as_view(), name="api_student_grades_list"),
 ]

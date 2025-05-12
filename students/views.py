@@ -57,8 +57,8 @@ class StudentRetrieveUpdateDeleteAPI(generics.RetrieveUpdateDestroyAPIView):
     queryset = Students.objects.all()
     serializer_class = StudentSerializer
     def get_object(self):
-        student_id = self.kwargs["student_id"]
-        return get_object_or_404(Students, student_id=student_id)
+        studentid = self.kwargs["studentid"]
+        return get_object_or_404(Students, studentid=studentid)
     
 
 
@@ -116,9 +116,9 @@ class StudentSubjectRetrieveUpdateDeleteAPI(generics.RetrieveUpdateDestroyAPIVie
     queryset = Subject.objects.all()
     serializer_class = StudentSubjectSerializer
     def get_queryset(self):
-        student_id = self.kwargs["student_id"]
+        studentid = self.kwargs["studentid"]
         subject_code = self.kwargs["subject_code"]
-        return Subject.objects.filter(student_id=student_id,subjectcode=subject_code)
+        return Subject.objects.filter(studentid=studentid,subjectcode=subject_code)
 
 # end of subjects
 
@@ -167,5 +167,5 @@ class StudentGradesListAPI(generics.ListAPIView):
     serializer_class = StudentGradeSerializer
 
     def get_queryset(self):
-        student_id = self.kwargs["student_id"]
-        return Grade.objects.filter(studentid=student_id)
+        studentid = self.kwargs["studentid"]
+        return Grade.objects.filter(studentid=studentid)
