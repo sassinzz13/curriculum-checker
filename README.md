@@ -1,6 +1,6 @@
 # Welcome to the Curriculum checker 
 
-To run please run docker first with the following command:  
+To run with docker please run the following command:  
 ```bash
 docker-compose up --build
 ```  
