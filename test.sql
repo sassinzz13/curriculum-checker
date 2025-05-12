@@ -1,1 +1,1 @@
-SELECT * FROM Subject
+SELECT * FROM Grade

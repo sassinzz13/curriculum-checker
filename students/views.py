@@ -1,169 +1,184 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework import generics
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from .models import Students, Subject, Grade
-from django.views.generic.edit import DeleteView, UpdateView,  CreateView
-from .serializers import StudentSerializer, StudentSubjectSerializer, StudentGradeSerializer
+from django.views.generic.edit import DeleteView, UpdateView, CreateView
+from .serializers import (
+    StudentSerializer,
+    StudentSubjectSerializer,
+    StudentGradeSerializer,
+)
+
 # Create your views here.
 
+#Student starts here
+
+#Student_list for querying the students
 def student_list(request):
     student_query = Students.objects.all()
-    return render(request, "student_data.html", {'student_query': student_query})
+    return render(request, "student_data.html", {"student_query": student_query})
 
-class student_create(CreateView):
-    model = Students
+# view to create a student
+class student_create(LoginRequiredMixin,CreateView):
+    # takes the table Students as a model
+    model = Students 
+    # the html template
     template_name = "student_create.html"
+    # the fields(or forms) that are shown 
     fields = [
-    "studentid", 
-    "firstname", 
-    "lastname", 
-    "middlename", 
-    "enrollmentyear", 
-    "curriculumid", 
-    "curriculum", 
-    "studentnumber"
-]
+        "studentid",
+        "firstname",
+        "lastname",
+        "middlename",
+        "enrollmentyear",
+        "curriculumid",
+        "curriculum",
+        "studentnumber",
+    ]
 
+    # if successful redirect to student_data which is our home
     success_url = reverse_lazy("student_data")
 
-class student_delete(DeleteView):
+# delete a student view
+class student_delete(LoginRequiredMixin,DeleteView):
     model = Students
     template_name = "student_delete.html"
     success_url = reverse_lazy("student_data")
-    
 
-class StudentUpdate(UpdateView):
+# update a student view
+class StudentUpdate(LoginRequiredMixin,UpdateView):
     model = Students
     template_name = "student_edit.html"
     fields = [
-        "studentid", 
-        "firstname", 
-        "lastname", 
-        "middlename", 
-        "enrollmentyear", 
-        "curriculumid", 
-        "curriculum", 
-        "studentnumber"
+        "studentid",
+        "firstname",
+        "lastname",
+        "middlename",
+        "enrollmentyear",
+        "curriculumid",
+        "curriculum",
+        "studentnumber",
     ]
     success_url = reverse_lazy("student_data")
+
 
 # LIst all students and create a new one
 class StudentListCreateApi(generics.ListCreateAPIView):
     queryset = Students.objects.all()
     serializer_class = StudentSerializer
 
-#Retrieve, update, delete student
+
+# Retrieve, update, delete student
 class StudentRetrieveUpdateDeleteAPI(generics.RetrieveUpdateDestroyAPIView):
     queryset = Students.objects.all()
     serializer_class = StudentSerializer
+
     def get_object(self):
         studentid = self.kwargs["studentid"]
         return get_object_or_404(Students, studentid=studentid)
-    
 
 
 # ENd of students
 
 # Start of subjects
 
+
 # Subject list queryable
 def subject_list(request):
     subject_query = Subject.objects.all()
-    return render(request, "subject_data.html", {'subject_query': subject_query})
+    return render(request, "subject_data.html", {"subject_query": subject_query})
 
 
 # List all subjects
-class subject_create(CreateView):
+class subject_create(LoginRequiredMixin,CreateView):
     model = Subject
     template_name = "subject_create.html"
     fields = [
-    "subjectcode", 
-    "subjecttitle", 
-    "units", 
-    "prerequisite", 
-    "semester", 
-    "yearlevel"
-]
-    
+        "subjectcode",
+        "subjecttitle",
+        "units",
+        "prerequisite",
+        "semester",
+        "yearlevel",
+    ]
+
     success_url = reverse_lazy("student_data")
+
 
 class subject_delete(DeleteView):
     model = Subject
     template_name = "subject_delete.html"
     success_url = reverse_lazy("student_data")
-    
 
-class subject_edit(CreateView):
+
+class subject_edit(LoginRequiredMixin,CreateView):
     model = Subject
     template_name = "subject_edit.html"
     fields = [
-    "subjectcode", 
-    "subjecttitle", 
-    "units", 
-    "prerequisite", 
-    "semester", 
-    "yearlevel"
-]
-    
+        "subjectcode",
+        "subjecttitle",
+        "units",
+        "prerequisite",
+        "semester",
+        "yearlevel",
+    ]
+
     success_url = reverse_lazy("student_data")
+
 
 # APis for subjects
 
+
 class StudentSubjectCreateApi(generics.ListCreateAPIView):
-    queryset = Subject.objects.all() 
+    queryset = Subject.objects.all()
     serializer_class = StudentSubjectSerializer
 
-#Retrieve, update, delete student
+
+# Retrieve, update, delete student
 class StudentSubjectRetrieveUpdateDeleteAPI(generics.RetrieveUpdateDestroyAPIView):
     queryset = Subject.objects.all()
     serializer_class = StudentSubjectSerializer
+
     def get_queryset(self):
         studentid = self.kwargs["studentid"]
         subjectcode = self.kwargs["subjectcode"]
-        return Subject.objects.filter(studentid=studentid,subjectcode=subjectcode)
+        return Subject.objects.filter(studentid=studentid, subjectcode=subjectcode)
+
 
 # end of subjects
 
 # Start of grades
 
+
 # Subject list queryable
 def grades_list(request):
     grades_query = Subject.objects.all()
-    return render(request, "grade_data.html", {'grades_query': grades_query})
+    return render(request, "grade_data.html", {"grades_query": grades_query})
+
 
 # List all subjects
-class grades_create(CreateView):
+class grades_create(LoginRequiredMixin,CreateView):
     model = Grade
     template_name = "grade_create.html"
-    fields = [
-    "gradeid", 
-    "studentid", 
-    "subjectcode", 
-    "semester", 
-    "grade", 
-    "units"
-]
-    
+    fields = ["gradeid", "studentid", "subjectcode", "semester", "grade", "units"]
+
     success_url = reverse_lazy("student_data")
 
-class grade_delete(DeleteView):
+
+class grade_delete(LoginRequiredMixin,DeleteView):
     model = Grade
     template_name = "grade_delete.html"
     success_url = reverse_lazy("student_data")
 
-class grade_edit(CreateView):
+
+class grade_edit(LoginRequiredMixin,CreateView):
     model = Grade
     template_name = "grade_edit.html"
-    fields = [
-    "gradeid", 
-    "studentid", 
-    "subjectcode", 
-    "semester", 
-    "grade", 
-    "units"
-]
-    
+    fields = ["gradeid", "studentid", "subjectcode", "semester", "grade", "units"]
+
     success_url = reverse_lazy("student_data")
+
 
 class StudentGradesListAPI(generics.ListAPIView):
     queryset = Grade.objects.all()

@@ -2,10 +2,17 @@
 
 {% block content %}
 
+
+ 
+
+
+
+{% if user.is_authenticated %}
   <!-- Create Buttons -->
   <a href="{% url 'student_create' %}" class="btn btn-success mb-2">Create New Student</a>
   <a href="{% url 'subject_create' %}" class="btn btn-success mb-2">Create New Subject</a>
   <a href="{% url 'grade_create' %}" class="btn btn-success mb-4">Add New Grade</a>
+
 
   <!-- Student Records -->
   <h2>Student Records</h2>
@@ -85,5 +92,8 @@
   {% endfor %}
 
   <hr>
+  {% else %}
+  <p>you are not logged in</p>
+ {% endif %}
 
 {% endblock %}
