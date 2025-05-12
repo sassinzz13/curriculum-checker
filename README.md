@@ -1,6 +1,47 @@
-# Welcome to the Curriculum checker  
+# Student Enrollmen Summary
 --------  
-#### How to install  
+Explanation of Each component 
+--------  
+# 1. The student Object
+const student = {
+  name: "Juan Dela Cruz",
+  
+  id: "2025-0001",
+  
+  gwa: 1.75,
+  
+  academicStanding: "Good Standing",
+  
+  units: 21,
+  
+  subjects: [
+  
+    "COMP101 – Introduction to Programming",
+    "MATH101 – College Algebra",
+    "ENG101 – Communication Skills",
+    "PE101 – Physical Fitness",
+    "NSTP101 – Civic Welfare Training"
+  ]
+};
+# Purpose 
+
+Purpose:
+This object holds the student's information, including:
+
+Name: Full name of the student.
+
+ID: Student identification number.
+
+GWA: General Weighted Average – used to determine academic performance.
+
+AcademicStanding: Describes the current status of the student.
+
+Units: Total academic units the student is enrolled in.
+
+Subjects: An array (list) of subjects the student has enrolled in.
+
+
+
 ```
 
 ```bash
