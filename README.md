@@ -1,3 +1,49 @@
+# ths is the summary of student enrollment
+
+
+##  Objective
+
+
+To demonstrate:
+- Conditional logic for scholarship recommendation
+- Looping through arrays to list subjects
+- Creating readable console output
+
+
+## student data
+```python
+cons student = {
+name = "Juan Dela Cruz", 
+ID: "2025-0001", 
+gwa: 1.75, 
+academicStanding: "Good Standing", 
+units: 21, 
+subject: 
+"COMP101 - Introduction to programming"
+"MATH101 - College Algebra"
+"ENG101 - Communication Skills
+"PE101 - Physical Fitness"
+"NSTP101 - Civic Welfare Training"
+
+
+function getScholarshipRecommendation(gwa) {
+  return gwa <= 4.0 
+    ? "Eligible for Academic Scholarship" 
+    : "Scholarship";
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Student Enrollmen Summary
 --------  
 Explanation of Each component 
@@ -88,3 +134,4 @@ generateEnrollmentSummary(student);
 ## Authors
 
 - [@octokatherine](https://www.github.com/octokatherine)
+
