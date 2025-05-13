@@ -32,6 +32,39 @@ function getScholarshipRecommendation(gwa) {
     : "Scholarship";
 }
 
+def generate_enrollment_summary(student):
+    print("Student Enrollment Summary\n")
+    
+    # Display student details
+    print(f"Student Name: {student['name']}")
+    print(f"Student ID: {student['id']}")
+    print(f"General Weighted Average (GWA): {student['gwa']}")
+    print(f"Academic Standing: {student['academicStanding']}")
+    print(f"Total Units Selected: {student['units']}")
+    
+    # List the subjects
+    print("Selected Subjects:")
+    for subject in student['subjects']:
+        print(f"- {subject}")
+    
+    # Display scholarship recommendation
+    print(f"\nScholarship Recommendation: {get_scholarship_recommendation(student['gwa'])}")
+
+# Example student data
+student = {
+    "name": "Juan Dela Cruz",
+    "id": "2025-0001",
+    "gwa": 1.75,
+    "academicStanding": "Good Standing",
+    "units": 21,
+    "subjects": [
+        "COMP101 – Introduction to Programming",
+        "MATH101 – College Algebra",
+        "ENG101 – Communication Skills",
+        "PE101 – Physical Fitness",
+        "NSTP101 – Civic Welfare Training"
+    ]
+}
 
 
 
