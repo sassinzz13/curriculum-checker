@@ -1,3 +1,4 @@
+# Handled by backend Tech Lead - Khristoferson Ortanez  
 # Welcome to the Curriculum checker 
 
 To run with docker please run the following command:  
