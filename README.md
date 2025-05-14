@@ -162,6 +162,6 @@ function generateEnrollmentSummary(student) {
 
 generateEnrollmentSummary(student);
 ```
-
+Handled by IT-21
 
 
