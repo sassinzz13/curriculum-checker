@@ -40,10 +40,10 @@ Signup:
 
 
 🧾 API Endpoints
-| Action                 | URL (Hosted)                                                        |
-| ---------------------- | ------------------------------------------------------------------- |
-| List/Create            | `https://curriculum-checker.onrender.com/api/students/`             |
-| Retrieve/Update/Delete | `https://curriculum-checker.onrender.com/api/students/<studentid>/` |
+| Action                 | URL (Hosted)                                                                                           |
+| ---------------------- | ------------------------------------------------------------------------------------------------------ |
+| List/Create            | `https://curriculum-checker.onrender.com/api/students/`                                                |
+| Retrieve/Update/Delete | `https://curriculum-checker.onrender.com/api/students/<studentid>/`                                    |
 
 🧑‍🏫 Subjects (linked to students)   
 | Action                            | URL (Hosted)                                                                                |
@@ -52,10 +52,10 @@ Signup:
 | Retrieve/Update/Delete by Subject | `https://curriculum-checker.onrender.com/api/students/<studentid>/subjects/<subject_code>/` |
 
 📝 Grades   
-| Action                 | URL (Hosted)                                                               |
-| ---------------------- | -------------------------------------------------------------------------- |
-| List all grades        | `https://curriculum-checker.onrender.com/api/grades/`                      |
-| List grades by student | `https://curriculum-checker.onrender.com/api/students/<studentid>/grades/` |
+| Action                 | URL (Hosted)                                                                                           |
+| ---------------------- | ------------------------------------------------------------------------------------------------------ |
+| List all grades        | `https://curriculum-checker.onrender.com/api/grades/`                                                  |
+| List grades by student | `https://curriculum-checker.onrender.com/api/students/<studentid>/grades/`                             |
 
 Replace <studentid> and <subject_code> with actual values from your data(ex. 24-01-002 for student id).  
 
@@ -66,11 +66,11 @@ Replace <studentid> and <subject_code> with actual values from your data(ex. 24-
     "studentid": "23-22-209",
     "firstname": "Khristoferson",
     "lastname": "Ortanez",
-    "middlename": "Santos",
-    "enrollmentyear": 2022,
+    "middlename": "Franco",
+    "enrollmentyear": 2023,
     "curriculumid": 101,
     "curriculum": "BSIT",
-    "studentnumber": 202322009
+    "studentnumber": 23-22-09
 }
 ```
 🔹 Create Subject  
