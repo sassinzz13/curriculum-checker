@@ -1,53 +1,113 @@
-# Handled by backend Tech Lead - Khristoferson Ortanez  
-# Welcome to the Curriculum checker 
+# 📘 Curriculum Checker API  
+### 🧠 Handled by Backend Tech Lead: **Khristoferson Ortanez**
 
-To run with docker please run the following command:  
+This project provides a backend API for managing **students**, **subjects**, and **grades** using Django REST Framework. The API is accessible both in local development and through a deployed instance on [Render](https://render.com).
+
+---
+
+## 🚀 Getting Started with Docker
+
+To run this project locally using Docker:
+
 ```bash
 docker-compose up --build
-```  
-then it will automatically run djangos `python manage.py runserver` through the help of docker  
+```
+This will automatically run the Django development server via:  
+```bash
+python manage.py runserver
+```
+🔐 Authentication Endpoints  
+✅ Hosted on Render  
+Login:  
+```https://curriculum-checker.onrender.com/accounts/api/login/```  
+Signup:  
+```https://curriculum-checker.onrender.com/accounts/api/signup/```  
 
-to fetch the endpoints follow the following in the hosted API:  
-#### Login:  
-```
-https://curriculum-checker.onrender.com/accounts/api/login/
-```
-#### Signup:  
-```
-https://curriculum-checker.onrender.com/accounts/api/signup/
-```
-
-To fetch the following on local development:
-#### Login:  
+🧪 Local Development  
+Login:  
 ```http://localhost:8000/accounts/api/login/```  
-#### Signup:  
-```http://localhost:8000/accounts/api/signup/```  
-example json format for login and signup:  
+   
+Signup:   
+```http://localhost:8000/accounts/api/signup/```   
+
+📦 JSON Payload for Signup/Login
 ```json
 {
-    "username": "testinglang2",
-    "password": "tumetesting2"
+    "username": "exampleuser",
+    "password": "examplepass"
 }
 ```
 
-to fetch the endpoints for editing and create and delete:  
-#### Create, Put(edit), Delete API for hosted API:  
-```https://curriculum-checker.onrender.com/api/students/```  
-#### Create, Put(edit), Delete API for non-hosted API:  
-```http://localhost:8000/api/students/```  
 
-example json:  
+🧾 API Endpoints
+| Action                 | URL (Hosted)                                                        |
+| ---------------------- | ------------------------------------------------------------------- |
+| List/Create            | `https://curriculum-checker.onrender.com/api/students/`             |
+| Retrieve/Update/Delete | `https://curriculum-checker.onrender.com/api/students/<studentid>/` |
+
+🧑‍🏫 Subjects (linked to students)   
+| Action                            | URL (Hosted)                                                                                |
+| --------------------------------- | ------------------------------------------------------------------------------------------- |
+| List/Create by Student            | `https://curriculum-checker.onrender.com/api/students/<studentid>/subjects/`                |
+| Retrieve/Update/Delete by Subject | `https://curriculum-checker.onrender.com/api/students/<studentid>/subjects/<subject_code>/` |
+
+📝 Grades   
+| Action                 | URL (Hosted)                                                               |
+| ---------------------- | -------------------------------------------------------------------------- |
+| List all grades        | `https://curriculum-checker.onrender.com/api/grades/`                      |
+| List grades by student | `https://curriculum-checker.onrender.com/api/students/<studentid>/grades/` |
+
+Replace <studentid> and <subject_code> with actual values from your data(ex. 24-01-002 for student id).  
+
+🧪 Example JSON Payloads  
+🔹 Create Student  
 ```json
-    {
-        "id": 2,
-        "student_id": "23-22-209",
-        "student_name": "khristoferson",
-        "student_section": "IT-21",
-        "professor_name": "REJAN TADEO",
-        "prelims": "89",
-        "midterms": "89",
-        "semifinals": "89",
-        "finals": "89",
-        "gwa": "69"
-    },
+{
+    "studentid": "23-22-209",
+    "firstname": "Khristoferson",
+    "lastname": "Ortanez",
+    "middlename": "Santos",
+    "enrollmentyear": 2022,
+    "curriculumid": 101,
+    "curriculum": "BSIT",
+    "studentnumber": 202322009
+}
 ```
+🔹 Create Subject  
+```json
+{
+    "subjectcode": "CS101",
+    "subjecttitle": "Introduction to Computer Science",
+    "units": 3,
+    "prerequisite": null,
+    "semester": "1st",
+    "yearlevel": 1
+}
+```
+
+🔹 Create Grade  
+```json
+{
+    "gradeid": 1,
+    "studentid": "23-22-209",
+    "subjectcode": "CS101",
+    "semester": "1st",
+    "grade": 1.75,
+    "units": 3
+}
+```
+🔄 Local vs Hosted API  
+For local testing, simply replace the domain with:
+```bash
+http://localhost:8000
+```
+For example:  
+```bash
+http://localhost:8000/api/students/
+```
+✅ Notes
+All write (POST/PUT/DELETE) operations require authenticated users.
+The system follows a RESTful convention.
+Endpoints are organized for maintainability and easy student-subject-grade linkage.
+
+  
