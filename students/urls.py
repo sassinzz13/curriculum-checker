@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import student_list,grades_list,subject_delete,subject_list,grade_delete, grade_edit, grades_create, grades_create, subject_edit, subject_create,student_delete, StudentUpdate, student_create, StudentListCreateApi, StudentRetrieveUpdateDeleteAPI, StudentSubjectCreateApi,StudentSubjectRetrieveUpdateDeleteAPI,StudentGradesListAPI
+from .views import student_list,grades_list,StudentGradesRetrieveUpdateDeleteAPI,subject_delete,subject_list,grade_delete, grade_edit, grades_create, grades_create, subject_edit, subject_create,student_delete, StudentUpdate, student_create, StudentListCreateApi, StudentRetrieveUpdateDeleteAPI, StudentSubjectCreateApi,StudentSubjectRetrieveUpdateDeleteAPI,StudentGradesListAPI
+
 
 urlpatterns = [
     # path("studentDetails/<int:pk>/", student_detail, name="student_detail"),
