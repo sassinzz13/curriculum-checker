@@ -3,7 +3,7 @@
 services:
   web:
     build: .
-    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000 #uncomment for production
+    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000 #uncomment for production :3
     # command: python /code/manage.py runserver 0.0.0.0:8000 #uncomment for development
     volumes:
       - .:/code  # Mount the current directory as /code in the container
