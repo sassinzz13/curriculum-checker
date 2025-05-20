@@ -41,7 +41,6 @@ const AdmPef = () => {
   // -----------------------------
   // FETCH STUDENT + EVALUATION DATA
   // -----------------------------
-
   const handleSearch = async () => {
     if (!searchStudentID) {
       alert("Please enter a student ID.");
@@ -49,7 +48,7 @@ const AdmPef = () => {
     }
   
     try {
-      const studentRes = await fetch(`https://curriculum-checker.onrender.com/api/students/${searchStudentID}`);
+      const studentRes = await fetch(`http://172.16.29.223:3000/api/students/${searchStudentID}/`);
       if (!studentRes.ok) throw new Error('Failed to fetch student data');
   
       const student = await studentRes.json();
@@ -64,15 +63,15 @@ const AdmPef = () => {
         name: `${student.firstname} ${student.middlename} ${student.lastname}`,
         college: student.curriculum,
         course: student.curriculum,
-        year: new Date().getFullYear() - student.enrollmntyear + 1
+        year: new Date().getFullYear() - student.enrollmentyear + 1
       };
   
       // Fetch grades
-      const gradesRes = await fetch(`https://curriculum-checker.onrender.com/api/students/${searchStudentID}/grades/`);
+      const gradesRes = await fetch(`http://172.16.29.223:3000/api/students/${searchStudentID}/grades/`);
       const gradesData = await gradesRes.json();
   
       // Fetch subject titles
-      const subjectsRes = await fetch(`https://curriculum-checker.onrender.com/api/students/${searchStudentID}/subjects/`);
+      const subjectsRes = await fetch(`http://172.16.29.223:3000/api/students/${searchStudentID}/subjects/`);
       const subjectsData = await subjectsRes.json();
   
       // Map subject code to title
@@ -81,22 +80,27 @@ const AdmPef = () => {
         subjectTitleMap[subj.subjectcode] = subj.subjecttitle;
       });
   
-      // Prepare evaluation data
-      const evaluations = gradesData.map(item => ({
-        code: item.subjectcode,
-        title: subjectTitleMap[item.subjectcode] || "Unknown",
-        credits: item.units,
-        grade: parseFloat(item.grade),
-        remarks: parseFloat(item.grade) <= 3.0 ? "PASSED" : "FAILED"
-      }));
-  
-      // Compute GWA
-      const totalUnits = evaluations.reduce((sum, curr) => sum + curr.credits, 0);
-      const weightedSum = evaluations.reduce((sum, curr) => sum + (curr.grade * curr.credits), 0);
-      const gwaValue = totalUnits > 0 ? weightedSum / totalUnits : null;
-      const gwaStanding = gwaValue ? getScholarshipRemark(gwaValue).remark : "N/A";
-  
-      setStudentInfo({ ...studentInfoFormatted, gwa: { value: gwaValue, standing: gwaStanding } });
+      const evaluations = gradesData.map(item => {
+        const grade = parseFloat(item.grade);
+        return {
+          code: item.subjectcode,
+          title: subjectTitleMap[item.subjectcode] || "Unknown",
+          grade,
+          remarks: grade <= 3.0 ? "PASSED" : "FAILED"
+        };
+      });
+
+      // Filter only valid grades (grade is a number between 1.0 and 5.0)
+      const validGrades = evaluations.filter(e => e.grade >= 1.0 && e.grade <= 5.0);
+
+      // Compute simple average
+      const totalGrades = validGrades.reduce((sum, curr) => sum + curr.grade, 0);
+      const gwaValue = validGrades.length > 0 ? totalGrades / validGrades.length : null;
+      const gwaStanding = gwaValue !== null
+        ? (gwaValue >= 1.0 && gwaValue <= 3.0 ? "GS" : "WS")
+        : "N/A"; 
+       
+      setStudentInfo({ ...studentInfoFormatted, grade: { value: gwaValue, standing: gwaStanding } });
       setSubjectEvaluations(evaluations);
       setEnrollmentOptions(subjectsData);
       setSelectedSubjects([]);
@@ -113,10 +117,10 @@ const AdmPef = () => {
   // -----------------------------
 
   const getScholarshipRemark = (gwaValue) => {
-    if (gwaValue >= 1.0 && gwaValue <= 1.25) return { percentage: 100, remark: "Full scholarship (President’s Lister)" };
-    if (gwaValue > 1.25 && gwaValue <= 1.5) return { percentage: 75, remark: "High academic achiever" };
-    if (gwaValue > 1.5 && gwaValue <= 1.75) return { percentage: 50, remark: "Academic achiever" };
-    if (gwaValue > 1.75 && gwaValue <= 2.0) return { percentage: 25, remark: "Qualified scholar" };
+    if (gwaValue >= 1.0 && gwaValue <= 1.25) return { percentage: 100, remark: "Full Scholarship (President’s Lister)" };
+    if (gwaValue > 1.25 && gwaValue <= 1.5) return { percentage: 75, remark: " High Merit Scholarship (DL)" };
+    if (gwaValue > 1.5 && gwaValue <= 1.75) return { percentage: 50, remark: "Half Merit Scholarship" };
+    if (gwaValue > 1.75 && gwaValue <= 2.0) return { percentage: 25, remark: "Qualified Scholarship" };
     return { percentage: 0, remark: "No scholarship" };
   };
 
@@ -163,9 +167,9 @@ const AdmPef = () => {
     doc.setFontSize(12);
     doc.text(`Student Name: ${studentInfo?.name}`, 20, y); y += 10;
     doc.text(`Student ID: ${studentInfo?.id}`, 20, y); y += 10;
-    doc.text(`General Weighted Average (GWA): ${studentInfo?.gwa?.value?.toFixed(2) || 'N/A'}`, 20, y); y += 10;
-    doc.text(`Academic Standing: ${studentInfo?.gwa?.standing}`, 20, y); y += 10;
-    doc.text(`Scholarship Recommendation: ${getScholarshipRemark(studentInfo?.gwa?.value).remark}`, 20, y); y += 15;
+    doc.text(`General Weighted Average (GWA): ${studentInfo?.grade?.value?.toFixed(2) || 'N/A'}`, 20, y); y += 10;
+    doc.text(`Academic Standing: ${studentInfo?.grade?.standing}`, 20, y); y += 10;
+    doc.text(`Scholarship Recommendation: ${getScholarshipRemark(studentInfo?.grade?.value).remark}`, 20, y); y += 15;
   
     doc.setFontSize(13);
     doc.text(`Selected Subjects (Total Units: ${totalSelectedUnits}):`, 20, y);
@@ -196,16 +200,35 @@ const AdmPef = () => {
   };
 
   // -----------------------------
-  // Enrollment Options
-  const uniqueSubjects = [];
-    const seenTitles = new Set();
+// Filter Subjects: Only show untaken subjects
+  const takenSubjectCodes = new Set(
+    subjectEvaluations
+      .filter(e => e.remarks === 'PASSED') // exclude only passed subjects
+      .map(e => e.code.trim().toUpperCase())
+  );
 
-    for (const subject of enrollmentOptions) {
-      if (!seenTitles.has(subject.subjecttitle)) {
-        uniqueSubjects.push(subject);
-        seenTitles.add(subject.subjecttitle);
-      }
+  const takenTitles = new Set(
+    subjectEvaluations
+      .filter(e => e.remarks === 'PASSED')
+      .map(e => e.title.trim().toUpperCase())
+  );
+
+  const uniqueSubjects = [];
+  const seenTitles = new Set();
+
+  for (const subject of enrollmentOptions) {
+    const normalizedCode = subject.subjectcode.trim().toUpperCase();
+    const normalizedTitle = subject.subjecttitle.trim().toUpperCase();
+
+    if (
+      !seenTitles.has(normalizedTitle) &&
+      !takenSubjectCodes.has(normalizedCode) &&
+      !takenTitles.has(normalizedTitle)
+    ) {
+      uniqueSubjects.push(subject);
+      seenTitles.add(normalizedTitle);
     }
+  }
   
 
   return (
@@ -226,7 +249,7 @@ const AdmPef = () => {
           <button className="search-btn" onClick={handleSearch}><FaSearch /></button>
         </div>
         <div className="info-bar">
-          <span>2nd Year Student Level</span>
+          <span>1st Year Student Level</span>
           <span>1st Semester S.Y 2024-2025</span>
         </div>
       </div>
@@ -262,7 +285,6 @@ const AdmPef = () => {
               <tr>
                 <th className='sub-code1'>Sub. Code</th>
                 <th>Subject Title</th>
-                <th>Credit(s)</th>
                 <th>Final Grade</th>
                 <th>Remarks</th>
               </tr>
@@ -272,7 +294,6 @@ const AdmPef = () => {
                 <tr key={index}>
                   <td className='sub-code'>{subject.code}</td>
                   <td>{subject.title}</td>
-                  <td>{subject.credits}</td>
                   <td>{subject.grade.toFixed(2)}</td>
                   <td className="remarks">{subject.remarks}</td>
                 </tr>
@@ -284,17 +305,17 @@ const AdmPef = () => {
         {/* ======================== */}
         {/* GWA + ACADEMIC STANDING */}
         {/* ======================== */}
-        {studentInfo?.gwa && (
+        {studentInfo?.grade && (
           <div className="gwa-container">
             <table className="gwa-table">
               <tbody>
                 <tr>
                   <td className="label">GENERAL WEIGHTED AVERAGE (GWA) :</td>
-                  <td className="value highlight">{studentInfo.gwa.value.toFixed(2)}</td>
+                  <td className="value highlight">{studentInfo?.grade?.value ? studentInfo.grade.value.toFixed(2) : 'N/A'}</td>
                 </tr>
                 <tr>
                   <td className="label">ACADEMIC STANDING (GS OR WS) :</td>
-                  <td className="value">{studentInfo.gwa.standing}</td>
+                  <td className="value">{studentInfo?.grade?.standing || 'N/A'}</td>
                 </tr>
               </tbody>
             </table>
@@ -304,14 +325,15 @@ const AdmPef = () => {
         {/* ======================== */}
         {/* APPROVAL STATUS (Read-only) */}
         {/* ======================== */}
+        <span className="std-status">Student Status</span>
         <div className="approval">
           <label className="radio-option">
-            <input type="radio" name="approval" value="approve" checked={studentInfo?.gwa && studentInfo.gwa.value <= 3.0} disabled />
-            <span className="radio-label">Approve</span>
+            <input type="radio" name="approval" value="approve" checked={studentInfo?.grade && studentInfo.grade.value <= 3.0} disabled />
+            <span className="radio-label">Regular</span>
           </label>
           <label className="radio-option">
-            <input type="radio" name="approval" value="decline" checked={studentInfo?.gwa && studentInfo.gwa.value > 3.0} disabled />
-            <span className="radio-label">Decline</span>
+            <input type="radio" name="approval" value="decline" checked={studentInfo?.grade && studentInfo.grade.value > 3.0} disabled />
+            <span className="radio-label">Irregular</span>
           </label>
         </div>
 
@@ -322,27 +344,28 @@ const AdmPef = () => {
           <div className="row">
             <span className="cell label">Recommend for Dean's List</span>
             <span className="cell option">YES</span>
-            <span className="cell checkbox"><input type="checkbox" checked={studentInfo?.gwa && studentInfo.gwa.value <= 1.5} disabled /></span>
+            <span className="cell checkbox"><input type="checkbox" checked={studentInfo?.grade && studentInfo.grade.value <= 1.5} disabled /></span>
             <span className="cell option">NO</span>
-            <span className="cell checkbox"><input type="checkbox" checked={studentInfo?.gwa && studentInfo.gwa.value > 1.5} disabled /></span>
+            <span className="cell checkbox"><input type="checkbox" checked={studentInfo?.grade && studentInfo.grade.value > 1.5} disabled /></span>
           </div>
 
           <div className="row">
             <span className="cell label">Recommend for Scholarship</span>
             {scholarshipOptions.map((percent) => (
               <span key={percent} className="cell">
-                <button
-                  className={`option-button ${selectedScholarship === percent ? 'selected' : ''}`}
-                  onClick={() => setSelectedScholarship(percent)}
-                  disabled
-                >
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={getScholarshipRemark(studentInfo?.grade?.value || 0).percentage === percent}
+                    disabled
+                  />
                   {percent}%
-                </button>
+                </label>
               </span>
             ))}
-            {studentInfo?.gwa && (
+            {studentInfo?.grade && (
               <span className="cell scholarship-remark">
-                {getScholarshipRemark(studentInfo.gwa.value).remark}
+                {getScholarshipRemark(studentInfo.grade.value).remark}
               </span>
             )}
           </div>

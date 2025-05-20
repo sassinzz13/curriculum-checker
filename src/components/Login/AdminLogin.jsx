@@ -16,7 +16,7 @@ const AdminLogin = () => {
         e.preventDefault();
 
         // Send credentials to backend API
-        const response = await fetch("https://curriculum-checker.onrender.com/accounts/api/login/", {
+        const response = await fetch("http://172.25.144.1:8000/accounts/api/login/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ username, password }),
@@ -38,7 +38,7 @@ const AdminLogin = () => {
             {/* Left side branding and visual elements */}
             <div className="left-side">
                 <div className="merlogo-container">
-                    <img className="merlogo" src="/assets/merlogo.png" alt="Merlogo" />
+                    <img className="merlogo" src="/assets/nakaw.png" alt="Merlogo" />
                 </div>
 
                 {/* Decorative images */}
@@ -47,14 +47,14 @@ const AdminLogin = () => {
                 <img src="/assets/light2.png" alt="Light effect 2" className="light2" />
                 <img src="/assets/tear.png" alt="Paper tear" className="tear" />
                 <img src="/assets/nakawulet.jpg" alt="heh" className="longet" />
+                <img src="/assets/shadow.png" alt="shadow" className="nino"/>
+                <img src="/assets/light.png" alt="ilaw" className="ilaw"/>
 
 
                 {/* Footer */}
                 <footer className="admin-footer">
-                    <div className="footer-container">
-                        <img src="/assets/logo-namin.png" alt="logonamin" className="logonamin" />
-                    </div>
-                    <p>© 2025 MgaLigmaProduction. All rights reserved.</p>
+
+                    <p>© 2025 Curriculum-Checker. All rights reserved.</p>
                 </footer>
             </div>
 
@@ -67,7 +67,7 @@ const AdminLogin = () => {
 
                 <div className="login-form-container">
                     <div className="login-form">
-                        <img src="/assets/facimage.png" alt="Admin Group" />
+                        <img src="/assets/facimage.jpg" alt="Admin Group" />
 
                         {/* Login form */}
                         <form onSubmit={handleLogin}>
