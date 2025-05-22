@@ -119,10 +119,10 @@ DATABASES = {
     "default": {
         "ENGINE": "mssql",
         "NAME": "FinalRemixDBMS",
-        "USER": "sa",
-        "PASSWORD": "Aketsii2025!",
-        "HOST": "db",          # comment this if youre not in linux and is on windows      
-        "PORT": "1433",
+    #    "USER": "John Albert Padua",
+    #    "PASSWORD": "Aketsii2025!",
+        "HOST": "DESKTOP-7I757D8\SQLEXPRESS",          # comment this if youre not in linux and is on windows      
+        "PORT": "",
         "OPTIONS": {
             "driver": "ODBC Driver 17 for SQL Server",
             "extra_params": "TrustServerCertificate=yes;Encrypt=no",
