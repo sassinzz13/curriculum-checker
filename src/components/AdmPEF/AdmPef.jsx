@@ -48,7 +48,7 @@ const AdmPef = () => {
     }
   
     try {
-      const studentRes = await fetch(`http://172.16.29.223:3000/api/students/${searchStudentID}/`);
+      const studentRes = await fetch(`http://localhost:8000/api/students/${searchStudentID}/`);
       if (!studentRes.ok) throw new Error('Failed to fetch student data');
   
       const student = await studentRes.json();
@@ -67,11 +67,11 @@ const AdmPef = () => {
       };
   
       // Fetch grades
-      const gradesRes = await fetch(`http://172.16.29.223:3000/api/students/${searchStudentID}/grades/`);
+      const gradesRes = await fetch(`http://localhost:8000/api/students/${searchStudentID}/grades/`);
       const gradesData = await gradesRes.json();
   
       // Fetch subject titles
-      const subjectsRes = await fetch(`http://172.16.29.223:3000/api/students/${searchStudentID}/subjects/`);
+      const subjectsRes = await fetch(`http://localhost:8000/api/students/${searchStudentID}/subjects/`);
       const subjectsData = await subjectsRes.json();
   
       // Map subject code to title
