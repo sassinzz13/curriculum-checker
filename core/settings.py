@@ -36,6 +36,7 @@ ALLOWED_HOSTS = [
     "172.16.28.70",
     "0.0.0.0",
     "curriculum-checker.onrender.com",
+    "localhost"
 ]
 
 
@@ -54,7 +55,7 @@ INSTALLED_APPS = [
     "accounts.apps.AccountsConfig",
 ]
 CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = ["http://localhost:5173", "http://localhost:5175"]
+CORS_ALLOWED_ORIGINS = ["http://localhost:5173", "http://localhost:5175", "http://localhost:8000"]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 CORS_ALLOW_HEADERS = ["*"]
