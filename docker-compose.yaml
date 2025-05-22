@@ -1,4 +1,4 @@
-version: '3.9'
+# version: '3.9'
 
 services:
 # added for database connection for linux since linux  doesnt have mssql
@@ -15,9 +15,8 @@ services:
 
   web:
     build: .
-    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000
-    # For development you can use:
-    # command: python /code/manage.py runserver 0.0.0.0:8000
+    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000 #uncomment for production
+    # command: python /code/manage.py runserver 0.0.0.0:8000 #uncomment for development
     volumes:
       - .:/code
     ports:
@@ -27,9 +26,3 @@ services:
     environment:
       - "DJANGO_SECRET_KEY=your-secret-key"
       - "DJANGO_DEBUG=True"
-    networks:
-      - backend
-
-networks:
-  backend:
-    driver: bridge

@@ -2,8 +2,12 @@ from django.shortcuts import render, get_object_or_404
 from rest_framework import generics
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
+from rest_framework.exceptions import NotFound
 from .models import Students, Subject, Grade
 from django.views.generic.edit import DeleteView, UpdateView, CreateView
+import logging 
+from rest_framework.generics import ListAPIView
+from rest_framework.exceptions import APIException
 from .serializers import (
     StudentSerializer,
     StudentSubjectSerializer,
@@ -184,12 +188,15 @@ class grade_edit(CreateView):
     success_url = reverse_lazy("student_data")
 
 
+
 class StudentGradesListAPI(generics.ListAPIView):
     queryset = Grade.objects.all()
     serializer_class = StudentGradeSerializer
 
+# Retrieve, update, delete student
+class StudentGradesRetrieveUpdateDeleteAPI(ListAPIView):
+    serializer_class = StudentGradeSerializer
+
     def get_queryset(self):
-        studentid = self.request.query_params.get("studentid")
-        if studentid:
-            return Grade.objects.filter(studentid=studentid)
-        return Grade.objects.all()
+        student_id = self.kwargs['studentid']
+        return Grade.objects.filter(studentid=student_id)
