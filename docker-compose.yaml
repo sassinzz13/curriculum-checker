@@ -1,14 +1,35 @@
 version: '3.9'
 
 services:
+# added for database connection for linux since linux  doesnt have mssql
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: mssql
+    environment:
+      SA_PASSWORD: "Aketsii2025!"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    networks:
+      - backend
+
   web:
     build: .
-    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000 #uncomment for production
-    # command: python /code/manage.py runserver 0.0.0.0:8000 #uncomment for development
+    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000
+    # For development you can use:
+    # command: python /code/manage.py runserver 0.0.0.0:8000
     volumes:
-      - .:/code  # Mount the current directory as /code in the container
+      - .:/code
     ports:
-      - "8000:8000"  # Expose port 8000 on both the host and the container
+      - "8000:8000"
+    depends_on:
+      - db
     environment:
       - "DJANGO_SECRET_KEY=your-secret-key"
       - "DJANGO_DEBUG=True"
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge

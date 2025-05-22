@@ -12,20 +12,22 @@ from .serializers import (
 
 # Create your views here.
 
-#Student starts here
+# Student starts here
 
-#Student_list for querying the students
+
+# Student_list for querying the students
 def student_list(request):
     student_query = Students.objects.all()
     return render(request, "student_data.html", {"student_query": student_query})
 
+
 # view to create a student
-class student_create(LoginRequiredMixin,CreateView):
+class student_create(CreateView):
     # takes the table Students as a model
-    model = Students 
+    model = Students
     # the html template
     template_name = "student_create.html"
-    # the fields(or forms) that are shown 
+    # the fields(or forms) that are shown
     fields = [
         "studentid",
         "firstname",
@@ -40,14 +42,16 @@ class student_create(LoginRequiredMixin,CreateView):
     # if successful redirect to student_data which is our home
     success_url = reverse_lazy("student_data")
 
+
 # delete a student view
-class student_delete(LoginRequiredMixin,DeleteView):
+class student_delete(DeleteView):
     model = Students
     template_name = "student_delete.html"
     success_url = reverse_lazy("student_data")
 
+
 # update a student view
-class StudentUpdate(LoginRequiredMixin,UpdateView):
+class StudentUpdate(UpdateView):
     model = Students
     template_name = "student_edit.html"
     fields = [
@@ -91,7 +95,7 @@ def subject_list(request):
 
 
 # List all subjects
-class subject_create(LoginRequiredMixin,CreateView):
+class subject_create(CreateView):
     model = Subject
     template_name = "subject_create.html"
     fields = [
@@ -112,7 +116,7 @@ class subject_delete(DeleteView):
     success_url = reverse_lazy("student_data")
 
 
-class subject_edit(LoginRequiredMixin,CreateView):
+class subject_edit(CreateView):
     model = Subject
     template_name = "subject_edit.html"
     fields = [
@@ -158,7 +162,7 @@ def grades_list(request):
 
 
 # List all subjects
-class grades_create(LoginRequiredMixin,CreateView):
+class grades_create(CreateView):
     model = Grade
     template_name = "grade_create.html"
     fields = ["gradeid", "studentid", "subjectcode", "semester", "grade", "units"]
@@ -166,13 +170,13 @@ class grades_create(LoginRequiredMixin,CreateView):
     success_url = reverse_lazy("student_data")
 
 
-class grade_delete(LoginRequiredMixin,DeleteView):
+class grade_delete(DeleteView):
     model = Grade
     template_name = "grade_delete.html"
     success_url = reverse_lazy("student_data")
 
 
-class grade_edit(LoginRequiredMixin,CreateView):
+class grade_edit(CreateView):
     model = Grade
     template_name = "grade_edit.html"
     fields = ["gradeid", "studentid", "subjectcode", "semester", "grade", "units"]

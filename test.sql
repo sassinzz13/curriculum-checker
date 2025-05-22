@@ -1,1 +1,1 @@
-SELECT * FROM Grade
+SELECT * FROM Students

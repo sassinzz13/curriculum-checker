@@ -28,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-(gqdq-ckew(&ettclblpb1dk-&t8!=r2=m%n+vs*=ex^9h(qy3"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     "192.168.43.130",
@@ -98,13 +98,30 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
+# for cloud hosted  database
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "mssql",
+#         "NAME": "FinalRemixDBMS",
+#         "USER": "Akecchi",
+#         "PASSWORD": "Aketsiii030720!",
+#         "HOST": "projsadbms.database.windows.net",
+#         "PORT": "1433",
+#         "OPTIONS": {
+#             "driver": "ODBC Driver 17 for SQL Server",
+#             "extra_params": "TrustServerCertificate=yes;Encrypt=no",
+#         },
+#     }
+# }
+
+# for locally hosted databases
 DATABASES = {
     "default": {
         "ENGINE": "mssql",
         "NAME": "FinalRemixDBMS",
-        "USER": "Akecchi",
-        "PASSWORD": "Aketsiii030720!",
-        "HOST": "projsadbms.database.windows.net",
+        "USER": "sa",
+        "PASSWORD": "Aketsii2025!",
+        "HOST": "db",          # comment this if youre not in linux and is on windows      
         "PORT": "1433",
         "OPTIONS": {
             "driver": "ODBC Driver 17 for SQL Server",
@@ -112,6 +129,7 @@ DATABASES = {
         },
     }
 }
+
 
 
 # Password validation
