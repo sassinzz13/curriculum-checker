@@ -1,28 +1,41 @@
-# version: '3.9'
+version: '3.9'
 
 services:
-# added for database connection for linux since linux  doesnt have mssql
-  db:
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    container_name: mssql
-    environment:
-      SA_PASSWORD: "Aketsii2025!"
-      ACCEPT_EULA: "Y"
-    ports:
-      - "1433:1433"
-    networks:
-      - backend
-
   web:
     build: .
-    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000 #uncomment for production
-    # command: python /code/manage.py runserver 0.0.0.0:8000 #uncomment for development
+    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000 # For production
+    # command: python /code/manage.py runserver 0.0.0.0:8000 # For development
     volumes:
       - .:/code
     ports:
       - "8000:8000"
-    depends_on:
-      - db
     environment:
       - "DJANGO_SECRET_KEY=your-secret-key"
       - "DJANGO_DEBUG=True"
+      # IMPORTANT: Add environment variables for your web app to connect to the DB
+      # These names might vary based on your Django settings (e.g., DATABASE_URL)
+      - "DB_HOST=db" # 'db' is the service name of your database container
+      - "DB_NAME=your_database_name" # Change this to your actual DB name
+      - "DB_USER=sa" # Or another user you configure
+      - "DB_PASSWORD=Aketsii2025!" # Match your SA_PASSWORD
+    depends_on:
+      - db # Ensures the 'db' service starts before 'web'
+    networks:
+      - backend # Connect your web app to the backend network
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: mssql # Optional, but good for consistent naming
+    environment:
+      SA_PASSWORD: "Aketsii2025!"
+      ACCEPT_EULA: "Y"
+      # You might want to specify a database name here if it's not created by your app
+      # For example: MSSQL_DB=your_database_name
+    ports:
+      - "1433:1433" # Expose SQL Server port
+    networks:
+      - backend # Connect your db to the backend network
+
+networks:
+  backend:
+    driver: bridge # Define the backend network
