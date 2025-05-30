@@ -1,15 +1,23 @@
 import { useState, useEffect } from "react";
 import "./StudentTable.css";
 
-const StudentTable = ({ isEditable }) => {
+const StudentTable = ({ isEditable, searchStudentID }) => {
   const [students, setStudents] = useState([]);
 
   useEffect(() => {
-    fetch("https://curriculum-checker.onrender.com/api/students/")
-      .then((res) => res.json())
+    if (!searchStudentID) return;
+
+    fetch(`http://localhost:8000/api/students/${searchStudentID}/grades/`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Student not found");
+        return res.json();
+      })
       .then((data) => setStudents(data))
-      .catch((err) => console.error(err));
-  }, []);
+      .catch((err) => {
+        console.error(err);
+        setStudents([]);
+      });
+  }, [searchStudentID]);
 
   const handleInputChange = (index, field, value) => {
     const updatedStudents = [...students];
@@ -20,7 +28,7 @@ const StudentTable = ({ isEditable }) => {
   const handleBlur = (index, field, value) => {
     const numericValue = Number(value);
     if (numericValue < 50 || numericValue > 100 || isNaN(numericValue)) {
-      handleInputChange(index, field, "0"); // Reset to empty string if not valid
+      handleInputChange(index, field, "0");
     } else {
       handleInputChange(index, field, value);
     }
@@ -28,24 +36,14 @@ const StudentTable = ({ isEditable }) => {
 
   const handleKeyDown = (index, field, e) => {
     if (e.key === "Enter") {
-      const value = e.target.value;
-      const numericValue = Number(value);
-      if (numericValue < 50 || numericValue > 100 || isNaN(numericValue)) {
-        handleInputChange(index, field, "0");
-      } else {
-        handleInputChange(index, field, value);
-      }
+      handleBlur(index, field, e.target.value);
     }
   };
 
   const calculateGWA = (student) => {
-    const { prelims, midterms, semifinals, finals } = student;
-    const grades = [prelims, midterms, semifinals, finals].map(Number);
-    const validGrades = grades.filter((g) => !isNaN(g));
-    if (validGrades.length === 4) {
-      return (validGrades.reduce((a, b) => a + b, 0) / 4).toFixed(2);
-    }
-    return "N/A";
+    const grades = ["prelims", "midterms", "semifinals", "finals"].map(field => Number(student[field]));
+    const validGrades = grades.filter(g => !isNaN(g));
+    return validGrades.length === 4 ? (validGrades.reduce((a, b) => a + b, 0) / 4).toFixed(2) : "N/A";
   };
 
   const saveGrades = async (student) => {
@@ -55,44 +53,39 @@ const StudentTable = ({ isEditable }) => {
     };
 
     try {
-      await fetch(`https://curriculum-checker.onrender.com/api/students/${student.id}`, {
+      await fetch(`http://localhost:8000/api/students/${searchStudentID}/grades/`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedStudent),
       });
-      console.log(`Saved grades for ${student.student_name}`);
+      console.log(`Saved grades for ${student.student_id}`);
     } catch (error) {
       console.error("Error updating grades:", error);
     }
   };
 
-  // Listen for "saveAllGrades" event
   useEffect(() => {
     const handleSave = () => {
-      students.forEach((student) => {
-        saveGrades(student);
-      });
+      students.forEach(saveGrades);
     };
 
     const tableElement = document.getElementById("student-table-component");
     tableElement?.addEventListener("saveAllGrades", handleSave);
+    return () => tableElement?.removeEventListener("saveAllGrades", handleSave);
+  }, [students, searchStudentID]);
 
-    return () => {
-      tableElement?.removeEventListener("saveAllGrades", handleSave);
-    };
-  }, [students]);
+  if (!students.length) {
+    return <div className="student-table-container">No grades found.</div>;
+  }
 
   return (
     <div className="student-table-container" id="student-table-component">
-      <h2 className="table-title">Class Information</h2>
+      <h2 className="table-title">Evaluation Grades</h2>
       <table className="student-table">
         <thead>
           <tr>
             <th>No.</th>
-            <th>Student ID</th>
-            <th>Student Name</th>
-            <th>Block</th>
-            <th>Professor</th>
+            <th>Subject</th>
             <th>Prelims</th>
             <th>Midterms</th>
             <th>Semifinals</th>
@@ -102,12 +95,9 @@ const StudentTable = ({ isEditable }) => {
         </thead>
         <tbody>
           {students.map((student, index) => (
-            <tr key={student.id}>
+            <tr key={student.gradeid || index}>
               <td>{index + 1}</td>
-              <td><input type="text" value={student.student_id || ""} disabled /></td>
-              <td><input type="text" value={student.student_name || ""} disabled /></td>
-              <td><input type="text" value={student.student_section || ""} disabled /></td>
-              <td><input type="text" value={student.professor_name || ""} disabled /></td>
+              <td>{student.subjectcode}</td>
               {["prelims", "midterms", "semifinals", "finals"].map((field) => (
                 <td key={field}>
                   <input
@@ -117,11 +107,6 @@ const StudentTable = ({ isEditable }) => {
                     onBlur={(e) => handleBlur(index, field, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, field, e)}
                     disabled={!isEditable}
-                    style={{
-                      appearance: "none",
-                      MozAppearance: "textfield",
-                      WebkitAppearance: "none",
-                    }}
                   />
                 </td>
               ))}

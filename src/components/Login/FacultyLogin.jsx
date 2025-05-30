@@ -1,96 +1,100 @@
 import React, { useState } from "react";
-import "./FacultyLogin.css";
+import "./AdminLogin.css";
 import Navbar from "../Navbar/Navbar";
 import { useNavigate } from "react-router-dom";
 
 const FacultyLogin = () => {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
+    // State for admin credentials
+    const [username, setADMUsername] = useState("");
+    const [password, setADMPassword] = useState("");
+
+    // React Router hook for navigation
     const navigate = useNavigate();
 
+    // Handles the login form submission
     const handleLogin = async (e) => {
         e.preventDefault();
-        try {
-            const response = await fetch("https://curriculum-checker.onrender.com/accounts/api/login/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ username, password }),
-            });
 
-            const data = await response.json();
+        // Send credentials to backend API
+        const response = await fetch("http://localhost:8000/accounts/api/login/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+        });
 
-            if (response.ok) {
-                navigate("/faculty-grades");
-            } else {
-                setError(data?.non_field_errors?.[0] || "Invalid credentials. Please try again.");
-            }
-        } catch (err) {
-            setError("Something went wrong. Please try again later.");
-            console.error("Login error:", err);
+        // Redirect on success or show alert on failure
+        if (response.ok) {
+            navigate("/faculty-grade");
+        } else {
+            alert("Invalid credentials. Please try again.");
         }
     };
 
     return (
-        <div className="faculty-main-container">
+        <div className="admin-main-container">
+            {/* Top navigation bar */}
             <Navbar />
+
+            {/* Left side branding and visual elements */}
             <div className="left-side">
                 <div className="merlogo-container">
-                    <img className="merlogo" src="/assets/merlogo.png" alt="Merlogo" />
+                    <img className="merlogo" src="/assets/nakaw.png" alt="Merlogo" />
                 </div>
 
-                <img src="/assets/wilkam.png" alt="wilkam" className="wilkam" />
-                <img src="/assets/light1.png" alt="light1" className="light1" />
-                <img src="/assets/light2.png" alt="light2" className="light2" />
-                <img src="/assets/tear.png" alt="paper tear" className="tear" />
+                {/* Decorative images */}
+                <img src="/assets/wilkam.png" alt="Welcome" className="wilkam" />
+                <img src="/assets/light1.png" alt="Light effect 1" className="light1" />
+                <img src="/assets/light2.png" alt="Light effect 2" className="light2" />
+                <img src="/assets/tear.png" alt="Paper tear" className="tear" />
+                <img src="/assets/nakawulet.jpg" alt="heh" className="longet" />
+                <img src="/assets/shadow.png" alt="shadow" className="nino"/>
+                <img src="/assets/light.png" alt="ilaw" className="ilaw"/>
 
-                <footer className="faculty-footer">
-                    <p>© 2025 MgaLigmaProduction. All rights reserved.</p>
+
+                {/* Footer */}
+                <footer className="admin-footer">
+
+                    <p>© 2025 Curriculum-Checker. All rights reserved.</p>
                 </footer>
             </div>
 
+            {/* Right side login form */}
             <div className="right-side">
                 <div className="LeftName">
-                    <h1>FACULTY LOGIN</h1>
+                    <h1>ENCODER LOGIN</h1>
                     <hr />
                 </div>
 
                 <div className="login-form-container">
                     <div className="login-form">
-                        <img src="/assets/facimage.png" alt="Faculty Group" />
+                        <img src="/assets/facimage.jpg" alt="Admin Group" />
 
+                        {/* Login form */}
                         <form onSubmit={handleLogin}>
-                            <label>FACULTY ID</label>
+                            <label htmlFor="admin-id">Encoder ID</label>
                             <input
+                                id="admin-id"
                                 type="text"
-                                value={username}
-                                onChange={(e) => {
-                                    setUsername(e.target.value);
-                                    setError("");
-                                }}
+                                value={username} 
+                                onChange={(e) => setADMUsername(e.target.value)} 
                                 required
-                                placeholder="Enter your Faculty ID"
+                                placeholder="Enter your admin ID"
                             />
 
-                            <label>PASSWORD</label>
+                            <label htmlFor="admin-password">Password</label>
                             <input
+                                id="admin-password"
                                 type="password"
                                 value={password}
-                                onChange={(e) => {
-                                    setPassword(e.target.value);
-                                    setError("");
-                                }}
+                                onChange={(e) => setADMPassword(e.target.value)}
                                 required
-                                placeholder="Enter your Password"
+                                placeholder="Enter your password"
                             />
-
-                            {error && <p className="error-message">{error}</p>}
 
                             <button type="submit">Sign In</button>
                         </form>
 
+                        {/* Placeholder link for forgot password */}
                         <div className="link">
                             <a href="#" className="forgot-password">Have you forgotten your Password?</a>
                         </div>

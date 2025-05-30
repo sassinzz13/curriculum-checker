@@ -16,7 +16,7 @@ const AdminLogin = () => {
         e.preventDefault();
 
         // Send credentials to backend API
-        const response = await fetch("http://172.25.144.1:8000/accounts/api/login/", {
+        const response = await fetch("http://localhost:8000/accounts/api/login/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ username, password }),

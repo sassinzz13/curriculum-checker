@@ -13,16 +13,16 @@ const App = () => {
         <div className="main-content">
           <Routes>
             {/* Route for Landing Page */}
-            <Route path="/off-limits" element={<LandingPage />} />
+            <Route path="/" element={<LandingPage />} />
 
             {/* Route for Faculty Login */}
-            <Route path="/off-limits" element={<FacultyLogin />} />
+            <Route path="/faculty-login" element={<FacultyLogin />} />
 
             {/* Route for FacultyGrades  */}
-            <Route path="/off-limits" element={<FacultyGrade />} /> 
+            <Route path="/faculty-grade" element={<FacultyGrade />} /> 
 
             {/* Route for Admin Login */}
-            <Route path="/" element={<AdminLogin />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
 
             {/* Route for Admin PEF */}
             <Route path="/admin-pef" element={<AdmPef/>}/>

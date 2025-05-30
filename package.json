@@ -2,15 +2,15 @@
   "name": "udm_portal",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
+  "type": "commonjs",
+  "main": "main.cjs",
   "scripts": {
-  "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
-  "build": "vite build",
-  "preview": "vite preview",
-  "lint": "eslint .",
-  "tailwind-init": "tailwindcss init -p",
-  "electron": "electron ."
-},
+    "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "tailwind-init": "tailwindcss init -p"
+  },
   "dependencies": {
     "axios": "^1.8.4",
     "jspdf": "^3.0.1",
@@ -37,9 +37,12 @@
     "vite": "^6.2.0",
     "wait-on": "^8.0.3"
   },
-  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
-  "main": "main.cjs",
+  "description": "Vite + React + Electron app with Tailwind and ESLint",
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
 }

@@ -17,8 +17,8 @@ const LandingPage = () => {
           <div className="fac-container">
             <Link to="/faculty-login"> {/* Link to Faculty Login page */}
               <img src="/assets/fac-logo.png" alt="faculty-logo" />
-              <h1>Are you a Faculty?</h1>
-              <p>Faculty grade students based on their subject, evaluating performance and providing feedback.</p>
+              <h1>Are you an Encoder?</h1>
+              <p>An Encoder grade students based on their subject, evaluating performance and providing feedback.</p>
             </Link>
           </div>
           
