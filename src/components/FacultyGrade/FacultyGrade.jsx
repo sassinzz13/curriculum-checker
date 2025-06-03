@@ -16,7 +16,7 @@ const FacultyGrade = () => {
   // Allowed passkeys
   const validPasskeys = ['143BCCS', '4321'];
 
-  // Function to calculate live GWA and standing based on edited or original grades
+  // Calculate live GWA and standing based on edited or original grades
   const calculateLiveGWA = () => {
     const gradesToUse = subjectEvaluations
       .map(subject => {
@@ -35,7 +35,7 @@ const FacultyGrade = () => {
     return { value: avg, standing };
   };
 
-  // FETCH STUDENT + EVALUATION DATA
+  // Fetch student + evaluation data, and check localStorage for saved grades
   const handleSearch = async () => {
     if (!searchStudentID.trim()) {
       alert("Please enter a student ID.");
@@ -79,7 +79,7 @@ const FacultyGrade = () => {
       });
 
       // Combine grades and subjects
-      const evaluations = gradesData.map(item => {
+      let evaluations = gradesData.map(item => {
         const grade = parseFloat(item.grade);
         return {
           code: item.subjectcode,
@@ -88,6 +88,28 @@ const FacultyGrade = () => {
           remarks: grade <= 3.0 ? "PASSED" : "FAILED"
         };
       });
+
+      // Check if there are saved grades in localStorage for this student
+      const savedGradesJSON = localStorage.getItem(`grades_${searchStudentID}`);
+      if (savedGradesJSON) {
+        try {
+          const savedGrades = JSON.parse(savedGradesJSON);
+          evaluations = evaluations.map(subject => {
+            const savedGrade = savedGrades[subject.code];
+            if (savedGrade !== undefined && savedGrade !== '') {
+              const gradeNum = parseFloat(savedGrade);
+              return {
+                ...subject,
+                grade: gradeNum,
+                remarks: gradeNum <= 3.0 ? "PASSED" : "FAILED",
+              };
+            }
+            return subject;
+          });
+        } catch (err) {
+          console.warn("Failed to parse saved grades from localStorage", err);
+        }
+      }
 
       // Calculate GWA and academic standing
       const validGrades = evaluations.filter(e => e.grade >= 1.0 && e.grade <= 5.0);
@@ -139,45 +161,31 @@ const FacultyGrade = () => {
     });
   };
 
-  // Save grades logic
+  // Save grades locally to localStorage instead of backend
   const saveGrades = async () => {
     try {
-      // Build updated grades array
-      const updatedGrades = subjectEvaluations.map(subject => {
+      // Build updated grades map for localStorage
+      const updatedGradesMap = {};
+      subjectEvaluations.forEach(subject => {
         const updatedGrade = editedGrades[subject.code];
-        return {
-          subjectcode: subject.code,
-          grade:
-            updatedGrade !== undefined && updatedGrade !== ''
-              ? parseFloat(updatedGrade)
-              : subject.grade,
-        };
+        updatedGradesMap[subject.code] =
+          updatedGrade !== undefined && updatedGrade !== ''
+            ? parseFloat(updatedGrade).toFixed(2)
+            : subject.grade.toFixed(2);
       });
 
-      // POST updated grades
-      const res = await fetch(`http://localhost:8000/api/students/${searchStudentID}/grades/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ grades: updatedGrades }),
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Failed to save grades:", errorText);
-        alert("Failed to save updated grades. See console for details.");
-        return;
-      }
+      // Save to localStorage keyed by studentID
+      localStorage.setItem(`grades_${searchStudentID}`, JSON.stringify(updatedGradesMap));
 
       // Update local state after save
-      const newEvaluations = updatedGrades.map(item => {
-        const remarks = item.grade <= 3.0 ? "PASSED" : "FAILED";
+      const newEvaluations = subjectEvaluations.map(subject => {
+        const gradeStr = updatedGradesMap[subject.code];
+        const grade = gradeStr !== undefined ? parseFloat(gradeStr) : subject.grade;
         return {
-          code: item.subjectcode,
-          title: subjectEvaluations.find(s => s.code === item.subjectcode)?.title || "Unknown",
-          grade: item.grade,
-          remarks,
+          code: subject.code,
+          title: subject.title,
+          grade,
+          remarks: grade <= 3.0 ? "PASSED" : "FAILED",
         };
       });
 
@@ -196,7 +204,7 @@ const FacultyGrade = () => {
 
       setIsEditing(false);
       setEditedGrades({});
-      alert("Grades successfully updated!");
+      alert("Grades successfully updated");
     } catch (error) {
       console.error(error);
       alert("Failed to save updated grades.");

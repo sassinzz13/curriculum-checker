@@ -13,7 +13,7 @@ const App = () => {
         <div className="main-content">
           <Routes>
             {/* Route for Landing Page */}
-            <Route path="/" element={<LandingPage />} />
+            <Route path="/landing-page" element={<LandingPage />} />
 
             {/* Route for Faculty Login */}
             <Route path="/faculty-login" element={<FacultyLogin />} />
@@ -22,7 +22,7 @@ const App = () => {
             <Route path="/faculty-grade" element={<FacultyGrade />} /> 
 
             {/* Route for Admin Login */}
-            <Route path="/admin-login" element={<AdminLogin />} />
+            <Route path="/" element={<AdminLogin />} />
 
             {/* Route for Admin PEF */}
             <Route path="/admin-pef" element={<AdmPef/>}/>

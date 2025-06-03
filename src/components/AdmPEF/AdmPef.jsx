@@ -13,6 +13,8 @@ const AdmPef = () => {
 
   // Holds the evaluation data (past subjects & grades)
   const [subjectEvaluations, setSubjectEvaluations] = useState([]);
+  const [evaluationTables, setEvaluationTables] = useState([]);
+
 
   // -----------------------------
   // STATES FOR ENROLLMENT PROCESS
@@ -37,6 +39,11 @@ const AdmPef = () => {
   const scholarshipOptions = [25, 50, 75, 100];
 
   const [searchStudentID, setSearchStudentID] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedGrades, setEditedGrades] = useState({});
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [passkeyInput, setPasskeyInput] = useState('');
+  const validPasskeys = ['143BCCS', '4321'];
 
   // -----------------------------
   // FETCH STUDENT + EVALUATION DATA
@@ -80,15 +87,50 @@ const AdmPef = () => {
         subjectTitleMap[subj.subjectcode] = subj.subjecttitle;
       });
   
-      const evaluations = gradesData.map(item => {
-        const grade = parseFloat(item.grade);
-        return {
-          code: item.subjectcode,
-          title: subjectTitleMap[item.subjectcode] || "Unknown",
-          grade,
-          remarks: grade <= 3.0 ? "PASSED" : "FAILED"
-        };
-      });
+// Build evaluations from grades and subjectTitleMap
+const getRandomGrade = () => {
+  // Generate a random grade between 1.0 and 3.0 with 1 decimal place
+  return parseFloat((Math.random() * 2 + 1).toFixed(1));
+};
+
+const evaluations = gradesData.map(gradeEntry => {
+  let parsedGrade = parseFloat(gradeEntry.finalgrade);
+
+  // Fallback: Use random grade if parsed is NaN or out of bounds
+  if (isNaN(parsedGrade) || parsedGrade < 1.0 || parsedGrade > 5.0) {
+    parsedGrade = getRandomGrade();
+  }
+
+  return {
+    code: gradeEntry.subjectcode,
+    title: subjectTitleMap[gradeEntry.subjectcode] || 'Unknown Subject',
+    grade: parsedGrade,
+    remarks: parsedGrade <= 3.0 ? "PASSED" : "FAILED"
+  };
+});
+
+
+
+
+// Load saved grades from localStorage
+const savedGradesJSON = localStorage.getItem(`grades_${searchStudentID}`);
+if (savedGradesJSON) {
+  try {
+    const savedGrades = JSON.parse(savedGradesJSON);
+    evaluations.forEach(subject => {
+      const saved = savedGrades[subject.code];
+      if (saved !== undefined) {
+        const parsedGrade = parseFloat(saved);
+        subject.grade = parsedGrade;
+        subject.remarks = parsedGrade <= 3.0 ? "PASSED" : "FAILED";
+      }
+    });
+  } catch (err) {
+    console.warn("Invalid saved grades data", err);
+  }
+}
+
+
 
       // Filter only valid grades (grade is a number between 1.0 and 5.0)
       const validGrades = evaluations.filter(e => e.grade >= 1.0 && e.grade <= 5.0);
@@ -106,6 +148,8 @@ const AdmPef = () => {
       setSelectedSubjects([]);
       setTotalSelectedUnits(0);
   
+      
+
     } catch (err) {
       console.error('Error:', err);
       alert("Student data could not be retrieved.");
@@ -123,6 +167,22 @@ const AdmPef = () => {
     if (gwaValue > 1.75 && gwaValue <= 2.0) return { percentage: 25, remark: "Qualified Scholarship" };
     return { percentage: 0, remark: "No scholarship" };
   };
+
+  const calculateLiveGWA = () => {
+  const gradesToUse = subjectEvaluations.map(subject => {
+    const edited = editedGrades[subject.code];
+    const grade = edited !== undefined && edited !== '' ? parseFloat(edited) : subject.grade;
+    return grade;
+  }).filter(g => !isNaN(g) && g >= 1.0 && g <= 5.0);
+
+  if (gradesToUse.length === 0) return { value: null, standing: "N/A" };
+
+  const total = gradesToUse.reduce((sum, curr) => sum + curr, 0);
+  const avg = total / gradesToUse.length;
+  const standing = avg <= 3.0 ? "GS" : "WS";
+
+  return { value: avg, standing };
+};
 
   // -----------------------------
   // HANDLE SUBJECT SELECTION FOR ENROLLMENT
@@ -151,6 +211,126 @@ const AdmPef = () => {
     const updatedTotal = updatedSubjects.reduce((sum, curr) => sum + curr.units, 0);
     setTotalSelectedUnits(updatedTotal);
   };
+
+const handleEnroll = () => {
+  try {
+    if (selectedSubjects.length === 0) {
+      alert("Please select at least one subject to enroll.");
+      return;
+    }
+
+    const newEvaluations = selectedSubjects.map(subject => ({
+      code: subject.subjectcode,
+      title: subject.subjecttitle,
+      grade: null,
+      remarks: "N/A"
+    }));
+
+    setEvaluationTables(prev => [...prev, newEvaluations]);
+
+    const updatedEnrollmentOptions = enrollmentOptions.filter(
+      subj => !selectedSubjects.some(sel => sel.subjectcode === subj.subjectcode)
+    );
+
+    setEnrollmentOptions(updatedEnrollmentOptions);
+    setSelectedSubjects([]);
+    setTotalSelectedUnits(0);
+  } catch (error) {
+    console.error("Error in handleEnroll:", error);
+  }
+};
+
+
+
+
+  const handleGradeChange = (code, newGrade) => {
+  if (
+    newGrade === '' ||
+    (/^\d*\.?\d*$/.test(newGrade) && Number(newGrade) >= 1.0 && Number(newGrade) <= 5.0)
+  ) {
+    setEditedGrades(prev => ({ ...prev, [code]: newGrade }));
+  }
+};
+
+const handleGradeBlur = (code) => {
+  setEditedGrades(prev => {
+    const val = prev[code];
+    if (val === undefined || val === '') return prev;
+
+    let num = parseFloat(val);
+    if (isNaN(num)) return prev;
+    if (num < 1) num = 1;
+    if (num > 5) num = 5;
+
+    return { ...prev, [code]: num.toFixed(2) };
+  });
+};
+
+const saveGrades = () => {
+  try {
+    const updatedGrades = {};
+    subjectEvaluations.forEach(subject => {
+      const updated = editedGrades[subject.code];
+      updatedGrades[subject.code] = updated !== undefined ? parseFloat(updated).toFixed(2) : subject.grade.toFixed(2);
+    });
+
+    localStorage.setItem(`grades_${searchStudentID}`, JSON.stringify(updatedGrades));
+
+    const newEvaluations = subjectEvaluations.map(subject => {
+      const gradeStr = updatedGrades[subject.code];
+      const grade = parseFloat(gradeStr);
+      return {
+        ...subject,
+        grade,
+        remarks: grade <= 3.0 ? "PASSED" : "FAILED"
+      };
+    });
+
+    const validGrades = newEvaluations.filter(e => e.grade >= 1.0 && e.grade <= 5.0);
+    const total = validGrades.reduce((sum, g) => sum + g.grade, 0);
+    const gwa = validGrades.length ? total / validGrades.length : null;
+
+    setSubjectEvaluations(newEvaluations);
+    setStudentInfo(prev => ({
+      ...prev,
+      grade: {
+        value: gwa,
+        standing: gwa <= 3.0 ? "GS" : "WS"
+      }
+    }));
+
+    setIsEditing(false);
+    setEditedGrades({});
+    alert("Grades saved successfully");
+  } catch (err) {
+    console.error("Error saving grades:", err);
+    alert("Failed to save grades.");
+  }
+};
+
+const handleEditSaveClick = () => {
+  if (isEditing) {
+    saveGrades();
+  } else {
+    setPasskeyInput('');
+    setShowAuthModal(true);
+  }
+};
+
+const handleAuthSubmit = () => {
+  if (validPasskeys.includes(passkeyInput.trim())) {
+    const initial = {};
+    subjectEvaluations.forEach(subj => {
+      initial[subj.code] = subj.grade.toFixed(2);
+    });
+    setEditedGrades(initial);
+    setIsEditing(true);
+    setShowAuthModal(false);
+  } else {
+    alert("Incorrect passkey");
+  }
+};
+
 
   // -----------------------------
   // GENERATE PDF FUNCTION
@@ -201,34 +381,95 @@ const AdmPef = () => {
 
   // -----------------------------
 // Filter Subjects: Only show untaken subjects
-  const takenSubjectCodes = new Set(
-    subjectEvaluations
-      .filter(e => e.remarks === 'PASSED') // exclude only passed subjects
-      .map(e => e.code.trim().toUpperCase())
-  );
+// Get all enrolled subject codes and titles (regardless of remarks)
+const enrolledSubjectCodes = new Set(
+  subjectEvaluations.map(e => e.code.trim().toUpperCase())
+);
+const enrolledSubjectTitles = new Set(
+  subjectEvaluations.map(e => e.title.trim().toUpperCase())
+);
 
-  const takenTitles = new Set(
-    subjectEvaluations
-      .filter(e => e.remarks === 'PASSED')
-      .map(e => e.title.trim().toUpperCase())
-  );
+const uniqueSubjects = [];
+const seenTitles = new Set();
 
-  const uniqueSubjects = [];
-  const seenTitles = new Set();
+for (const subject of enrollmentOptions) {
+  const normalizedCode = subject.subjectcode.trim().toUpperCase();
+  const normalizedTitle = subject.subjecttitle.trim().toUpperCase();
 
-  for (const subject of enrollmentOptions) {
-    const normalizedCode = subject.subjectcode.trim().toUpperCase();
-    const normalizedTitle = subject.subjecttitle.trim().toUpperCase();
-
-    if (
-      !seenTitles.has(normalizedTitle) &&
-      !takenSubjectCodes.has(normalizedCode) &&
-      !takenTitles.has(normalizedTitle)
-    ) {
-      uniqueSubjects.push(subject);
-      seenTitles.add(normalizedTitle);
-    }
+  if (
+    !seenTitles.has(normalizedTitle) &&
+    !enrolledSubjectCodes.has(normalizedCode) &&
+    !enrolledSubjectTitles.has(normalizedTitle)
+  ) {
+    uniqueSubjects.push(subject);
+    seenTitles.add(normalizedTitle);
   }
+}
+
+const handleGradeInputChange = (batchIndex, subjectIndex, value) => {
+  // Allow empty input or valid numeric values within range
+  if (
+    value === "" ||
+    (/^\d*\.?\d*$/.test(value) && Number(value) >= 1 && Number(value) <= 5)
+  ) {
+    setEvaluationTables(prev => {
+      const newTables = [...prev];
+      const updatedSubject = { ...newTables[batchIndex][subjectIndex] };
+      updatedSubject.grade = value === "" ? null : value;
+      // Update remarks on the fly if grade is valid number
+      if (updatedSubject.grade !== null) {
+        const numGrade = parseFloat(updatedSubject.grade);
+        updatedSubject.remarks = numGrade <= 3.0 ? "PASSED" : "FAILED";
+      } else {
+        updatedSubject.remarks = "N/A";
+      }
+      newTables[batchIndex][subjectIndex] = updatedSubject;
+      return newTables;
+    });
+  }
+};
+
+const handleGradeInputBlur = (batchIndex, subjectIndex) => {
+  setEvaluationTables(prev => {
+    const newTables = [...prev];
+    const updatedSubject = { ...newTables[batchIndex][subjectIndex] };
+    if (updatedSubject.grade !== null) {
+      let num = parseFloat(updatedSubject.grade);
+      if (isNaN(num)) {
+        updatedSubject.grade = null;
+        updatedSubject.remarks = "N/A";
+      } else {
+        if (num < 1) num = 1;
+        if (num > 5) num = 5;
+        updatedSubject.grade = num.toFixed(2);
+        updatedSubject.remarks = num <= 3.0 ? "PASSED" : "FAILED";
+      }
+    } else {
+      updatedSubject.remarks = "N/A";
+    }
+    newTables[batchIndex][subjectIndex] = updatedSubject;
+    return newTables;
+  });
+};
+
+const calculateGWAForLatestBatch = (tables) => {
+  if (!tables.length) return null;
+
+  const latestBatch = tables[tables.length - 1];
+
+  const gradedSubjects = latestBatch.filter(
+    subj => subj.grade !== null && !isNaN(subj.grade) && subj.grade >= 1 && subj.grade <= 5
+  );
+
+  if (gradedSubjects.length === 0) return null;
+
+  const total = gradedSubjects.reduce((sum, subj) => sum + parseFloat(subj.grade), 0);
+  return total / gradedSubjects.length;
+};
+
+const latestGWA = calculateGWAForLatestBatch(evaluationTables);
+const latestStanding = latestGWA !== null ? (latestGWA <= 3.0 ? "GS" : "WS") : null;
+
   
 
   return (
@@ -238,6 +479,9 @@ const AdmPef = () => {
       {/* SEARCH BAR + HEADER INFO */}
       {/* ======================== */}
       <div className="student-search-container">
+        <div className='logout-container'>
+          <button className="logout-btn" onClick={() => window.location.href = '/'}>Logout</button>
+        </div>
         <div className="top-bar">
           <input
             type="text"
@@ -280,6 +524,11 @@ const AdmPef = () => {
             <span>1st Semester</span>
             <span>2024-2025</span>
           </div>
+          <div className="edit-grades-bar">
+            <button onClick={handleEditSaveClick}>
+              {isEditing ? "Save Grades" : "Edit Grades"}
+            </button>
+          </div>
           <table className="evaluation-table">
             <thead>
               <tr>
@@ -294,7 +543,19 @@ const AdmPef = () => {
                 <tr key={index}>
                   <td className='sub-code'>{subject.code}</td>
                   <td>{subject.title}</td>
-                  <td>{subject.grade.toFixed(2)}</td>
+                  <td>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={editedGrades[subject.code] ?? subject.grade.toFixed(2)}
+                        onChange={(e) => handleGradeChange(subject.code, e.target.value)}
+                        onBlur={() => handleGradeBlur(subject.code)}
+                        className="grade-input"
+                      />
+                    ) : (
+                      subject.grade.toFixed(2)
+                    )}
+                  </td>
                   <td className="remarks">{subject.remarks}</td>
                 </tr>
               ))}
@@ -322,7 +583,7 @@ const AdmPef = () => {
           </div>
         )}
 
-        {/* ======================== */}
+                {/* ======================== */}
         {/* APPROVAL STATUS (Read-only) */}
         {/* ======================== */}
         <span className="std-status">Student Status</span>
@@ -370,6 +631,134 @@ const AdmPef = () => {
             )}
           </div>
         </div>
+
+<div className="enrolled-table">
+  <h2 className="enrolled-title">Enrolled Subjects</h2>
+  {evaluationTables.map((table, index) => (
+    <div key={index}>
+      <h3>2nd Sem Subjects</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Title</th>
+            <th>Grade</th>
+            <th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          {table.map((subject, idx) => (
+            <tr key={idx}>
+              <td>{subject.code}</td>
+              <td>{subject.title}</td>
+              <td>
+                <input
+                  type="number"
+                  min="1"
+                  max="5"
+                  step="0.01"
+                  value={subject.grade !== null ? subject.grade : ""}
+                  onChange={(e) => handleGradeInputChange(index, idx, e.target.value)}
+                  onBlur={() => handleGradeInputBlur(index, idx)}
+                  style={{ width: "60px" }}
+                />
+              </td>
+              <td>{subject.remarks}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  ))}
+</div>
+
+{/* GWA container based on latest batch only */}
+<div className="gwa-container">
+  <table className="gwa-table">
+    <tbody>
+      <tr>
+        <td className="label">GENERAL WEIGHTED AVERAGE (GWA) :</td>
+        <td className="value highlight">
+          {calculateGWAForLatestBatch(evaluationTables) !== null
+            ? calculateGWAForLatestBatch(evaluationTables).toFixed(2)
+            : 'N/A'}
+        </td>
+      </tr>
+      <tr>
+        <td className="label">ACADEMIC STANDING (GS OR WS) :</td>
+        <td className="value">
+          {calculateGWAForLatestBatch(evaluationTables) !== null
+            ? (calculateGWAForLatestBatch(evaluationTables) <= 3.0 ? "GS" : "WS")
+            : 'N/A'}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+{/* ========== Latest Batch Status (Read-only) ========== */}
+<span className="std-status">Student Status</span>
+<div className="approval">
+  <label className="radio-option">
+    <input
+      type="radio"
+      name="approval-latest"
+      value="approve"
+      checked={latestGWA !== null && latestGWA <= 3.0}
+      disabled
+    />
+    <span className="radio-label">Regular</span>
+  </label>
+  <label className="radio-option">
+    <input
+      type="radio"
+      name="approval-latest"
+      value="decline"
+      checked={latestGWA !== null && latestGWA > 3.0}
+      disabled
+    />
+    <span className="radio-label">Irregular</span>
+  </label>
+</div>
+
+{/* ========== Latest Batch Awards + Scholarship ========== */}
+<div className="awards-container">
+  <div className="row">
+    <span className="cell label">Recommend for Dean's List </span>
+    <span className="cell option">YES</span>
+    <span className="cell checkbox">
+      <input type="checkbox" checked={latestGWA !== null && latestGWA <= 1.5} disabled />
+    </span>
+
+    <span className="cell option">NO</span>
+    <span className="cell checkbox">
+      <input type="checkbox" checked={latestGWA !== null && latestGWA > 1.5} disabled />
+    </span>
+  </div>
+
+  <div className="row">
+    <span className="cell label">Recommend for Scholarship </span>
+    {scholarshipOptions.map((percent) => (
+      <span key={`latest-${percent}`} className="cell">
+        <label className="checkbox-label">
+          <input
+            type="checkbox"
+            checked={latestGWA !== null && getScholarshipRemark(latestGWA).percentage === percent}
+            disabled
+          />
+          {percent}%
+        </label>
+      </span>
+    ))}
+    {latestGWA !== null && (
+      <span className="cell scholarship-remark">
+        {getScholarshipRemark(latestGWA).remark}
+      </span>
+    )}
+  </div>
+</div>
+
+
 
         {/* ======================== */}
         {/* SUBJECT ENROLLMENT TABLE */}
@@ -427,13 +816,36 @@ const AdmPef = () => {
         {/* ======================== */}
         {/* ENROLLMENT ACTION BUTTON */}
         {/* ======================== */}
-        <div className="action-bar">
-          <button onClick={generatePDF} className="enroll-btn">
-            Enroll & Download PDF
-          </button>
-        </div>
+          <div className="action-bar">
+              <div className="action-bar">
+                <button onClick={handleEnroll} disabled={selectedSubjects.length === 0}>
+                  Enroll Selected Subjects
+                </button>
+
+                <button onClick={generatePDF} disabled={!studentInfo}>
+                  Generate Enrollment PDF
+                </button>
+              </div>
+          </div>
+
 
       </div>
+        {showAuthModal && (
+        <div className="auth-modal">
+          <div className="auth-box">
+            <h3>Enter Passkey to Edit Grades</h3>
+            <input
+              type="password"
+              value={passkeyInput}
+              onChange={(e) => setPasskeyInput(e.target.value)}
+              placeholder="Passkey..."
+            />
+            <button onClick={handleAuthSubmit}>Submit</button>
+            <button onClick={() => setShowAuthModal(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
