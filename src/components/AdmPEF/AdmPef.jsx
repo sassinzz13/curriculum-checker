@@ -45,12 +45,16 @@ const AdmPef = () => {
   const [passkeyInput, setPasskeyInput] = useState('');
   const validPasskeys = ['143BCCS', '4321'];
 
+  const [isGradesFinalized, setIsGradesFinalized] = useState(false);
+  const [secondSemEvaluations, setSecondSemEvaluations] = useState([]);
+
+
+
   // -----------------------------
   // FETCH STUDENT + EVALUATION DATA
   // -----------------------------
   const handleSearch = async () => {
     if (!searchStudentID) {
-      alert("Please enter a student ID.");
       return;
     }
   
@@ -60,7 +64,6 @@ const AdmPef = () => {
   
       const student = await studentRes.json();
       if (!student || !student.studentid) {
-        alert("Student not found.");
         return;
       }
   
@@ -152,7 +155,6 @@ if (savedGradesJSON) {
 
     } catch (err) {
       console.error('Error:', err);
-      alert("Student data could not be retrieved.");
     }
   };
 
@@ -199,8 +201,6 @@ if (savedGradesJSON) {
         setSelectedSubjects([...selectedSubjects, subject]);
         setTotalSelectedUnits(newTotal);
       }
-    } else {
-      alert(`You cannot select more than ${maxUnits} units.`);
     }
   };
   
@@ -215,7 +215,6 @@ if (savedGradesJSON) {
 const handleEnroll = () => {
   try {
     if (selectedSubjects.length === 0) {
-      alert("Please select at least one subject to enroll.");
       return;
     }
 
@@ -243,7 +242,8 @@ const handleEnroll = () => {
 
 
 
-  const handleGradeChange = (code, newGrade) => {
+ const handleGradeChange = (code, newGrade) => {
+  // Allow empty input or numbers between 1.0 and 5.0 (including decimals)
   if (
     newGrade === '' ||
     (/^\d*\.?\d*$/.test(newGrade) && Number(newGrade) >= 1.0 && Number(newGrade) <= 5.0)
@@ -259,8 +259,9 @@ const handleGradeBlur = (code) => {
 
     let num = parseFloat(val);
     if (isNaN(num)) return prev;
-    if (num < 1) num = 1;
-    if (num > 5) num = 5;
+
+    // Clamp the number between 1 and 5
+    num = Math.min(Math.max(num, 1), 5);
 
     return { ...prev, [code]: num.toFixed(2) };
   });
@@ -268,43 +269,51 @@ const handleGradeBlur = (code) => {
 
 const saveGrades = () => {
   try {
-    const updatedGrades = {};
-    subjectEvaluations.forEach(subject => {
-      const updated = editedGrades[subject.code];
-      updatedGrades[subject.code] = updated !== undefined ? parseFloat(updated).toFixed(2) : subject.grade.toFixed(2);
-    });
+    // Function to update an evaluations array based on editedGrades
+    const updateEvaluations = (evaluations) => {
+      return evaluations.map(subject => {
+        const updatedStr = editedGrades[subject.code];
+        const grade = updatedStr !== undefined ? parseFloat(updatedStr) : subject.grade;
 
-    localStorage.setItem(`grades_${searchStudentID}`, JSON.stringify(updatedGrades));
+        return {
+          ...subject,
+          grade,
+          remarks: grade <= 3.0 ? "PASSED" : "FAILED"
+        };
+      });
+    };
 
-    const newEvaluations = subjectEvaluations.map(subject => {
-      const gradeStr = updatedGrades[subject.code];
-      const grade = parseFloat(gradeStr);
-      return {
-        ...subject,
-        grade,
-        remarks: grade <= 3.0 ? "PASSED" : "FAILED"
-      };
-    });
+    // Update both semesters if needed
+    const updatedFirstSem = updateEvaluations(subjectEvaluations);
+    const updatedSecondSem = updateEvaluations(secondSemEvaluations);
 
-    const validGrades = newEvaluations.filter(e => e.grade >= 1.0 && e.grade <= 5.0);
-    const total = validGrades.reduce((sum, g) => sum + g.grade, 0);
-    const gwa = validGrades.length ? total / validGrades.length : null;
+    // Combine all valid grades to compute GWA
+    const allGrades = [...updatedFirstSem, ...updatedSecondSem]
+      .filter(e => e.grade >= 1.0 && e.grade <= 5.0)
+      .map(e => e.grade);
 
-    setSubjectEvaluations(newEvaluations);
+    const total = allGrades.reduce((sum, g) => sum + g, 0);
+    const gwa = allGrades.length ? total / allGrades.length : null;
+
+    // Save grades to localStorage (you can customize key if you want to save both semesters)
+    localStorage.setItem(`grades_${searchStudentID}`, JSON.stringify(editedGrades));
+
+    // Update state
+    setSubjectEvaluations(updatedFirstSem);
+    setSecondSemEvaluations(updatedSecondSem);
+
     setStudentInfo(prev => ({
       ...prev,
       grade: {
         value: gwa,
-        standing: gwa <= 3.0 ? "GS" : "WS"
+        standing: gwa !== null ? (gwa <= 3.0 ? "GS" : "WS") : "N/A"
       }
     }));
 
     setIsEditing(false);
     setEditedGrades({});
-    alert("Grades saved successfully");
   } catch (err) {
     console.error("Error saving grades:", err);
-    alert("Failed to save grades.");
   }
 };
 
@@ -317,6 +326,7 @@ const handleEditSaveClick = () => {
   }
 };
 
+
 const handleAuthSubmit = () => {
   if (validPasskeys.includes(passkeyInput.trim())) {
     const initial = {};
@@ -326,8 +336,6 @@ const handleAuthSubmit = () => {
     setEditedGrades(initial);
     setIsEditing(true);
     setShowAuthModal(false);
-  } else {
-    alert("Incorrect passkey");
   }
 };
 
@@ -335,49 +343,53 @@ const handleAuthSubmit = () => {
   // -----------------------------
   // GENERATE PDF FUNCTION
   // -----------------------------
+const generatePDF = () => {
+  const doc = new jsPDF();
+  let y = 20;
 
-  const generatePDF = () => {
-    const doc = new jsPDF();
-    let y = 20;
-  
-    doc.setFontSize(14);
-    doc.text('Student Enrollment Summary', 20, y);
-    y += 10;
-  
-    doc.setFontSize(12);
-    doc.text(`Student Name: ${studentInfo?.name}`, 20, y); y += 10;
-    doc.text(`Student ID: ${studentInfo?.id}`, 20, y); y += 10;
-    doc.text(`General Weighted Average (GWA): ${studentInfo?.grade?.value?.toFixed(2) || 'N/A'}`, 20, y); y += 10;
-    doc.text(`Academic Standing: ${studentInfo?.grade?.standing}`, 20, y); y += 10;
-    doc.text(`Scholarship Recommendation: ${getScholarshipRemark(studentInfo?.grade?.value).remark}`, 20, y); y += 15;
-  
-    doc.setFontSize(13);
-    doc.text(`Selected Subjects (Total Units: ${totalSelectedUnits}):`, 20, y);
-    y += 10;
-  
-    // Table headers
-    doc.setFontSize(12);
-    doc.text('Code', 20, y);
-    doc.text('Title', 50, y);
-    doc.text('Units', 180, y, { align: 'right' });
+  doc.setFontSize(14);
+  doc.text('Student Grade Evaluation Report', 20, y);
+  y += 10;
+
+  doc.setFontSize(12);
+  doc.text(`Student Name: ${studentInfo?.name || 'N/A'}`, 20, y); y += 10;
+  doc.text(`Student ID: ${studentInfo?.id || 'N/A'}`, 20, y); y += 10;
+  doc.text(`General Weighted Average (GWA): ${studentInfo?.grade?.value?.toFixed(2) || 'N/A'}`, 20, y); y += 10;
+  doc.text(`Academic Standing: ${studentInfo?.grade?.standing || 'N/A'}`, 20, y); y += 10;
+  doc.text(`Scholarship Recommendation: ${getScholarshipRemark(studentInfo?.grade?.value).remark || 'N/A'}`, 20, y); y += 15;
+
+  doc.setFontSize(13);
+  doc.text('Evaluated Subjects:', 20, y);
+  y += 10;
+
+  // Table headers
+  doc.setFontSize(12);
+  doc.text('Code', 20, y);
+  doc.text('Title', 60, y);
+  doc.text('Grade', 150, y);
+  doc.text('Remarks', 180, y);
+  y += 8;
+
+  // Flatten and render evaluation tables
+  const flattenedSubjects = subjectEvaluations;
+
+  flattenedSubjects.forEach(subject => {
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
+    }
+
+    doc.text(subject.code || '-', 20, y);
+    doc.text(subject.title || '-', 60, y);
+    doc.text(subject.grade !== null ? subject.grade.toString() : '-', 150, y);
+    doc.text(subject.remarks || '-', 180, y);
     y += 8;
-  
-    // Subject list
-    selectedSubjects.forEach(subject => {
-      if (y > 270) { // new page if needed
-        doc.addPage();
-        y = 20;
-      }
-      doc.text(subject.subjectcode, 20, y);
-      doc.text(subject.subjecttitle, 50, y);
-      doc.text(subject.units.toString(), 180, y, { align: 'right' });
-      y += 8;
-    });
-  
-    // Save the file
-    const safeName = studentInfo?.name?.replace(/[^a-z0-9]/gi, '_') || 'student';
-    doc.save(`${safeName}_enrollment_summary.pdf`);
-  };
+  });
+
+  const safeName = studentInfo?.name?.replace(/[^a-z0-9]/gi, '_') || 'student';
+  doc.save(`${safeName}_grade_evaluation.pdf`);
+};
+
 
   // -----------------------------
 // Filter Subjects: Only show untaken subjects
@@ -406,50 +418,30 @@ for (const subject of enrollmentOptions) {
   }
 }
 
-const handleGradeInputChange = (batchIndex, subjectIndex, value) => {
-  // Allow empty input or valid numeric values within range
-  if (
-    value === "" ||
-    (/^\d*\.?\d*$/.test(value) && Number(value) >= 1 && Number(value) <= 5)
-  ) {
-    setEvaluationTables(prev => {
-      const newTables = [...prev];
-      const updatedSubject = { ...newTables[batchIndex][subjectIndex] };
-      updatedSubject.grade = value === "" ? null : value;
-      // Update remarks on the fly if grade is valid number
-      if (updatedSubject.grade !== null) {
-        const numGrade = parseFloat(updatedSubject.grade);
-        updatedSubject.remarks = numGrade <= 3.0 ? "PASSED" : "FAILED";
-      } else {
-        updatedSubject.remarks = "N/A";
-      }
-      newTables[batchIndex][subjectIndex] = updatedSubject;
-      return newTables;
-    });
-  }
+const handleGradeInputChange = (tableIndex, subjectIndex, value) => {
+  if (isGradesFinalized) return;
+
+  const updatedTables = [...evaluationTables];
+  const parsed = parseFloat(value);
+  updatedTables[tableIndex][subjectIndex].grade = isNaN(parsed) ? null : parsed;
+  updatedTables[tableIndex][subjectIndex].remarks = parsed <= 3.0 ? "PASSED" : "FAILED";
+  setEvaluationTables(updatedTables);
 };
 
-const handleGradeInputBlur = (batchIndex, subjectIndex) => {
-  setEvaluationTables(prev => {
-    const newTables = [...prev];
-    const updatedSubject = { ...newTables[batchIndex][subjectIndex] };
-    if (updatedSubject.grade !== null) {
-      let num = parseFloat(updatedSubject.grade);
-      if (isNaN(num)) {
-        updatedSubject.grade = null;
-        updatedSubject.remarks = "N/A";
-      } else {
-        if (num < 1) num = 1;
-        if (num > 5) num = 5;
-        updatedSubject.grade = num.toFixed(2);
-        updatedSubject.remarks = num <= 3.0 ? "PASSED" : "FAILED";
-      }
-    } else {
-      updatedSubject.remarks = "N/A";
-    }
-    newTables[batchIndex][subjectIndex] = updatedSubject;
-    return newTables;
-  });
+const handleGradeInputBlur = (tableIndex, subjectIndex) => {
+  if (isGradesFinalized) return;
+
+  const updatedTables = [...evaluationTables];
+  const subject = updatedTables[tableIndex][subjectIndex];
+
+  if (subject.grade !== null) {
+    let grade = parseFloat(subject.grade);
+    if (grade < 1) grade = 1;
+    if (grade > 5) grade = 5;
+    subject.grade = grade.toFixed(2);
+    subject.remarks = grade <= 3.0 ? "PASSED" : "FAILED";
+    setEvaluationTables(updatedTables);
+  }
 };
 
 const calculateGWAForLatestBatch = (tables) => {
@@ -470,7 +462,98 @@ const calculateGWAForLatestBatch = (tables) => {
 const latestGWA = calculateGWAForLatestBatch(evaluationTables);
 const latestStanding = latestGWA !== null ? (latestGWA <= 3.0 ? "GS" : "WS") : null;
 
-  
+const handleFinalizeGrades = () => {
+  const flattenedNewSubjects = evaluationTables.flat().filter(s => s.grade !== null);
+
+  const parsedSubjects = flattenedNewSubjects.map(subject => {
+    const parsedGrade = parseFloat(subject.grade);
+    const grade = isNaN(parsedGrade) ? 5.0 : parsedGrade;
+    return {
+      code: subject.code,
+      title: subject.title,
+      grade: grade,
+      remarks: grade <= 3.0 ? "PASSED" : "FAILED"
+    };
+  });
+
+  setSecondSemEvaluations(parsedSubjects); // Store separately, not merged
+
+  // Recalculate GWA using both semesters
+  const allGrades = [...subjectEvaluations, ...parsedSubjects];
+  const validGrades = allGrades.filter(e => e.grade >= 1.0 && e.grade <= 5.0);
+  const total = validGrades.reduce((sum, g) => sum + g.grade, 0);
+  const gwa = validGrades.length ? total / validGrades.length : null;
+
+  setStudentInfo(prev => ({
+    ...prev,
+    grade: {
+      value: gwa,
+      standing: gwa <= 3.0 ? "GS" : "WS"
+    }
+  }));
+
+  setIsGradesFinalized(true);
+};
+
+// State for 2nd sem grades
+const [secondSemEditedGrades, setSecondSemEditedGrades] = useState({});
+
+useEffect(() => {
+  if (!searchStudentID) return;
+
+  const saved2nd = localStorage.getItem(`grades_2ndSem_${searchStudentID}`);
+
+  if (saved2nd) {
+    const parsed = JSON.parse(saved2nd);
+    setSecondSemEvaluations(prev =>
+      prev.map(subj => {
+        const savedGrade = parsed[subj.code];
+        return {
+          ...subj,
+          grade: savedGrade ? parseFloat(savedGrade) : subj.grade,
+          remarks: savedGrade && parseFloat(savedGrade) <= 3 ? "PASSED" : "FAILED"
+        };
+      })
+    );
+  } else {
+    // 👇 Clear 2nd sem evaluations if no saved grades found
+    setSecondSemEvaluations([]);
+  }
+
+  // Reset editing state too
+  setSecondSemEditedGrades({});
+}, [searchStudentID]);
+
+
+
+
+
+// Save 2nd sem grades when saving
+const saveSecondSemGrades = () => {
+  const updatedGrades = {};
+  secondSemEvaluations.forEach(subject => {
+    const updated = secondSemEditedGrades[subject.code];
+    updatedGrades[subject.code] = updated !== undefined ? parseFloat(updated).toFixed(2) : subject.grade.toFixed(2);
+  });
+
+  localStorage.setItem(`grades_2ndSem_${searchStudentID}`, JSON.stringify(updatedGrades));
+
+  const newEvaluations = secondSemEvaluations.map(subject => {
+    const gradeStr = updatedGrades[subject.code];
+    const grade = parseFloat(gradeStr);
+    return {
+      ...subject,
+      grade,
+      remarks: grade <= 3.0 ? "PASSED" : "FAILED"
+    };
+  });
+
+  setSecondSemEvaluations(newEvaluations);
+  setSecondSemEditedGrades({});
+  setIsEditing(false);
+};
+
+
 
   return (
     <div className="adm-pef-main">
@@ -515,53 +598,55 @@ const latestStanding = latestGWA !== null ? (latestGWA <= 3.0 ? "GS" : "WS") : n
           </div>
         )}
 
-        {/* ======================== */}
-        {/* EVALUATION TABLE         */}
-        {/* ======================== */}
-        <div className="evaluation-container">
-          <h2 className="evaluation-title">EVALUATION</h2>
-          <div className="evaluation-header">
-            <span>1st Semester</span>
-            <span>2024-2025</span>
-          </div>
-          <div className="edit-grades-bar">
-            <button onClick={handleEditSaveClick}>
-              {isEditing ? "Save Grades" : "Edit Grades"}
-            </button>
-          </div>
-          <table className="evaluation-table">
-            <thead>
-              <tr>
-                <th className='sub-code1'>Sub. Code</th>
-                <th>Subject Title</th>
-                <th>Final Grade</th>
-                <th>Remarks</th>
-              </tr>
-            </thead>
-            <tbody>
-              {subjectEvaluations.map((subject, index) => (
-                <tr key={index}>
-                  <td className='sub-code'>{subject.code}</td>
-                  <td>{subject.title}</td>
-                  <td>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={editedGrades[subject.code] ?? subject.grade.toFixed(2)}
-                        onChange={(e) => handleGradeChange(subject.code, e.target.value)}
-                        onBlur={() => handleGradeBlur(subject.code)}
-                        className="grade-input"
-                      />
-                    ) : (
-                      subject.grade.toFixed(2)
-                    )}
-                  </td>
-                  <td className="remarks">{subject.remarks}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+{/* ======================== */}
+{/* EVALUATION TABLES        */}
+{/* ======================== */}
+
+{/* 1st Semester */}
+<div className="evaluation-container">
+  <h2 className="evaluation-title">EVALUATION</h2>
+  <div className="evaluation-header">
+    <span>1st Semester</span>
+    <span>2024-2025</span>
+  </div>
+  <div className="edit-grades-bar">
+    <button onClick={handleEditSaveClick}>
+      {isEditing ? "Save Grades" : "Edit Grades"}
+    </button>
+  </div>
+  <table className="evaluation-table">
+    <thead>
+      <tr>
+        <th className='sub-code1'>Sub. Code</th>
+        <th>Subject Title</th>
+        <th>Final Grade</th>
+        <th>Remarks</th>
+      </tr>
+    </thead>
+    <tbody>
+      {subjectEvaluations.map((subject, index) => (
+        <tr key={index}>
+          <td className='sub-code'>{subject.code}</td>
+          <td>{subject.title}</td>
+          <td>
+            {isEditing ? (
+              <input
+                type="text"
+                value={editedGrades[subject.code] ?? subject.grade.toFixed(2)}
+                onChange={(e) => handleGradeChange(subject.code, e.target.value)}
+                onBlur={() => handleGradeBlur(subject.code)}
+                className="grade-input"
+              />
+            ) : (
+              subject.grade.toFixed(2)
+            )}
+          </td>
+          <td className="remarks">{subject.remarks}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
 
         {/* ======================== */}
         {/* GWA + ACADEMIC STANDING */}
@@ -632,131 +717,272 @@ const latestStanding = latestGWA !== null ? (latestGWA <= 3.0 ? "GS" : "WS") : n
           </div>
         </div>
 
-<div className="enrolled-table">
-  <h2 className="enrolled-title">Enrolled Subjects</h2>
-  {evaluationTables.map((table, index) => (
-    <div key={index}>
-      <h3>2nd Sem Subjects</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Code</th>
-            <th>Title</th>
-            <th>Grade</th>
-            <th>Remarks</th>
-          </tr>
-        </thead>
-        <tbody>
-          {table.map((subject, idx) => (
-            <tr key={idx}>
-              <td>{subject.code}</td>
-              <td>{subject.title}</td>
-              <td>
+{/* 2nd Semester */}
+{secondSemEvaluations.length > 0 && (
+  <div className="evaluation-container-2nd">
+    <div className="evaluation-header">
+      <span>2nd Semester</span>
+      <span>2024-2025</span>
+    </div>
+    <table className="evaluation-table-2nd">
+      <thead>
+        <tr>
+          <th className='sub-code1'>Sub. Code</th>
+          <th>Subject Title</th>
+          <th>Final Grade</th>
+          <th>Remarks</th>
+        </tr>
+      </thead>
+      <tbody>
+        {secondSemEvaluations.map((subject, index) => (
+          <tr key={index}>
+            <td className='sub-code'>{subject.code}</td>
+            <td>{subject.title}</td>
+            <td>
+              {isEditing ? (
                 <input
-                  type="number"
-                  min="1"
-                  max="5"
-                  step="0.01"
-                  value={subject.grade !== null ? subject.grade : ""}
-                  onChange={(e) => handleGradeInputChange(index, idx, e.target.value)}
-                  onBlur={() => handleGradeInputBlur(index, idx)}
-                  style={{ width: "60px" }}
+                  type="text"
+                  value={secondSemEditedGrades[subject.code] ?? subject.grade.toFixed(2)}
+                  onChange={(e) => handleSecondSemGradeChange(subject.code, e.target.value)}
+                  onBlur={() => handleSecondSemGradeBlur(subject.code)}
+                  className="grade-input"
+                  inputMode="decimal"
+                  pattern="[0-9]*"
                 />
-              </td>
-              <td>{subject.remarks}</td>
-            </tr>
-          ))}
+              ) : (
+                subject.grade.toFixed(2)
+              )}
+            </td>            
+            <td className="remarks">{subject.remarks}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+
+    {/* ================= GWA and Status Section ================= */}
+    <div className="gwa-container">
+      <table className="gwa-table">
+        <tbody>
+          <tr>
+            <td className="label">GENERAL WEIGHTED AVERAGE (GWA) :</td>
+            <td className="value highlight">
+              {calculateGWAForLatestBatch(evaluationTables) !== null
+                ? calculateGWAForLatestBatch(evaluationTables).toFixed(2)
+                : 'N/A'}
+            </td>
+          </tr>
+          <tr>
+            <td className="label">ACADEMIC STANDING (GS OR WS) :</td>
+            <td className="value">
+              {calculateGWAForLatestBatch(evaluationTables) !== null
+                ? (calculateGWAForLatestBatch(evaluationTables) <= 3.0 ? "GS" : "WS")
+                : 'N/A'}
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
-  ))}
-</div>
 
-{/* GWA container based on latest batch only */}
-<div className="gwa-container">
-  <table className="gwa-table">
-    <tbody>
-      <tr>
-        <td className="label">GENERAL WEIGHTED AVERAGE (GWA) :</td>
-        <td className="value highlight">
-          {calculateGWAForLatestBatch(evaluationTables) !== null
-            ? calculateGWAForLatestBatch(evaluationTables).toFixed(2)
-            : 'N/A'}
-        </td>
-      </tr>
-      <tr>
-        <td className="label">ACADEMIC STANDING (GS OR WS) :</td>
-        <td className="value">
-          {calculateGWAForLatestBatch(evaluationTables) !== null
-            ? (calculateGWAForLatestBatch(evaluationTables) <= 3.0 ? "GS" : "WS")
-            : 'N/A'}
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+    <span className="std-status">Student Status</span>
+    <div className="approval">
+      <label className="radio-option">
+        <input
+          type="radio"
+          name="approval-latest"
+          value="approve"
+          checked={latestGWA !== null && latestGWA <= 3.0}
+          disabled
+        />
+        <span className="radio-label">Regular</span>
+      </label>
+      <label className="radio-option">
+        <input
+          type="radio"
+          name="approval-latest"
+          value="decline"
+          checked={latestGWA !== null && latestGWA > 3.0}
+          disabled
+        />
+        <span className="radio-label">Irregular</span>
+      </label>
+    </div>
 
-{/* ========== Latest Batch Status (Read-only) ========== */}
-<span className="std-status">Student Status</span>
-<div className="approval">
-  <label className="radio-option">
-    <input
-      type="radio"
-      name="approval-latest"
-      value="approve"
-      checked={latestGWA !== null && latestGWA <= 3.0}
-      disabled
-    />
-    <span className="radio-label">Regular</span>
-  </label>
-  <label className="radio-option">
-    <input
-      type="radio"
-      name="approval-latest"
-      value="decline"
-      checked={latestGWA !== null && latestGWA > 3.0}
-      disabled
-    />
-    <span className="radio-label">Irregular</span>
-  </label>
-</div>
+    <div className="awards-container">
+      <div className="row">
+        <span className="cell label">Recommend for Dean's List </span>
+        <span className="cell option">YES</span>
+        <span className="cell checkbox">
+          <input type="checkbox" checked={latestGWA !== null && latestGWA <= 1.5} disabled />
+        </span>
 
-{/* ========== Latest Batch Awards + Scholarship ========== */}
-<div className="awards-container">
-  <div className="row">
-    <span className="cell label">Recommend for Dean's List </span>
-    <span className="cell option">YES</span>
-    <span className="cell checkbox">
-      <input type="checkbox" checked={latestGWA !== null && latestGWA <= 1.5} disabled />
-    </span>
+        <span className="cell option">NO</span>
+        <span className="cell checkbox">
+          <input type="checkbox" checked={latestGWA !== null && latestGWA > 1.5} disabled />
+        </span>
+      </div>
 
-    <span className="cell option">NO</span>
-    <span className="cell checkbox">
-      <input type="checkbox" checked={latestGWA !== null && latestGWA > 1.5} disabled />
-    </span>
+      <div className="row">
+        <span className="cell label">Recommend for Scholarship </span>
+        {scholarshipOptions.map((percent) => (
+          <span key={`latest-${percent}`} className="cell">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={latestGWA !== null && getScholarshipRemark(latestGWA).percentage === percent}
+                disabled
+              />
+              {percent}%
+            </label>
+          </span>
+        ))}
+        {latestGWA !== null && (
+          <span className="cell scholarship-remark">
+            {getScholarshipRemark(latestGWA).remark}
+          </span>
+        )}
+      </div>
+    </div>
   </div>
+)}
 
-  <div className="row">
-    <span className="cell label">Recommend for Scholarship </span>
-    {scholarshipOptions.map((percent) => (
-      <span key={`latest-${percent}`} className="cell">
-        <label className="checkbox-label">
-          <input
-            type="checkbox"
-            checked={latestGWA !== null && getScholarshipRemark(latestGWA).percentage === percent}
-            disabled
-          />
-          {percent}%
-        </label>
-      </span>
-    ))}
-    {latestGWA !== null && (
-      <span className="cell scholarship-remark">
-        {getScholarshipRemark(latestGWA).remark}
-      </span>
+
+{!isGradesFinalized && (
+  <>
+    <div className="enrolled-table">
+      <h2 className="enrolled-title">Enrolled Subjects</h2>
+      {evaluationTables.map((table, index) => (
+        <div key={index}>
+          <h3>2nd Sem Subjects</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Title</th>
+                <th>Grade</th>
+                <th>Remarks</th>
+              </tr>
+            </thead>
+            <tbody>
+              {table.map((subject, idx) => (
+                <tr key={idx}>
+                  <td>{subject.code}</td>
+                  <td>{subject.title}</td>
+                  <td>
+                    <input
+                      type="number"
+                      min="1"
+                      max="5"
+                      step="0.01"
+                      value={subject.grade !== null ? subject.grade : ""}
+                      onChange={(e) => handleGradeInputChange(index, idx, e.target.value)}
+                      onBlur={() => handleGradeInputBlur(index, idx)}
+                      disabled={isGradesFinalized}
+                      style={{ width: "60px" }}
+                    />
+                  </td>
+                  <td>{subject.remarks}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
+    </div>
+
+    {evaluationTables.length > 0 && (
+      <div className="finalize-grades-bar">
+        <button onClick={handleFinalizeGrades}>Finalize Grades</button>
+      </div>
     )}
-  </div>
-</div>
+
+    {/* GWA container based on latest batch only */}
+    <div className="gwa-container">
+      <table className="gwa-table">
+        <tbody>
+          <tr>
+            <td className="label">GENERAL WEIGHTED AVERAGE (GWA) :</td>
+            <td className="value highlight">
+              {calculateGWAForLatestBatch(evaluationTables) !== null
+                ? calculateGWAForLatestBatch(evaluationTables).toFixed(2)
+                : 'N/A'}
+            </td>
+          </tr>
+          <tr>
+            <td className="label">ACADEMIC STANDING (GS OR WS) :</td>
+            <td className="value">
+              {calculateGWAForLatestBatch(evaluationTables) !== null
+                ? (calculateGWAForLatestBatch(evaluationTables) <= 3.0 ? "GS" : "WS")
+                : 'N/A'}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    {/* ========== Latest Batch Status (Read-only) ========== */}
+    <span className="std-status">Student Status</span>
+    <div className="approval">
+      <label className="radio-option">
+        <input
+          type="radio"
+          name="approval-latest"
+          value="approve"
+          checked={latestGWA !== null && latestGWA <= 3.0}
+          disabled
+        />
+        <span className="radio-label">Regular</span>
+      </label>
+      <label className="radio-option">
+        <input
+          type="radio"
+          name="approval-latest"
+          value="decline"
+          checked={latestGWA !== null && latestGWA > 3.0}
+          disabled
+        />
+        <span className="radio-label">Irregular</span>
+      </label>
+    </div>
+
+    {/* ========== Latest Batch Awards + Scholarship ========== */}
+    <div className="awards-container">
+      <div className="row">
+        <span className="cell label">Recommend for Dean's List </span>
+        <span className="cell option">YES</span>
+        <span className="cell checkbox">
+          <input type="checkbox" checked={latestGWA !== null && latestGWA <= 1.5} disabled />
+        </span>
+
+        <span className="cell option">NO</span>
+        <span className="cell checkbox">
+          <input type="checkbox" checked={latestGWA !== null && latestGWA > 1.5} disabled />
+        </span>
+      </div>
+
+      <div className="row">
+        <span className="cell label">Recommend for Scholarship </span>
+        {scholarshipOptions.map((percent) => (
+          <span key={`latest-${percent}`} className="cell">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={latestGWA !== null && getScholarshipRemark(latestGWA).percentage === percent}
+                disabled
+              />
+              {percent}%
+            </label>
+          </span>
+        ))}
+        {latestGWA !== null && (
+          <span className="cell scholarship-remark">
+            {getScholarshipRemark(latestGWA).remark}
+          </span>
+        )}
+      </div>
+    </div>
+  </>
+)}
+
 
 
 
