@@ -120,9 +120,7 @@ DATABASES = {
     "default": {
         "ENGINE": "mssql",
         "NAME": "FinalRemixDBMS",
-    #    "USER": "John Albert Padua",
-    #    "PASSWORD": "Aketsii2025!",
-        "HOST": "DESKTOP-7I757D8\SQLEXPRESS",          # comment this if youre not in linux and is on windows      
+        "HOST": "nanami\SQLEXPRESS",   #nanami is the name of my mssql and desktop just change it accordingly      
         "PORT": "",
         "OPTIONS": {
             "driver": "ODBC Driver 17 for SQL Server",
